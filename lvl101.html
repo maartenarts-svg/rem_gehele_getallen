@@ -43,6 +43,15 @@ let currentIndex = 0;
 let exercises = [];
 let xp = 0;
 
+// LocalStorage sleutels
+const storageKeyXP = 'level1_xp';
+const storageKeyGeslaagd = 'level1_geslaagd';
+
+// Laad eerder opgeslagen XP
+if(localStorage.getItem(storageKeyXP)){
+  xp = parseInt(localStorage.getItem(storageKeyXP));
+}
+
 function updateProgressBar() {
   document.getElementById('LVL101progressBar').style.width = (currentIndex / numExercises * 100) + "%";
 }
@@ -87,6 +96,9 @@ function showExercise(){
     fb.style.display = 'none';
 
     const geslaagd = xp >= 12;
+    localStorage.setItem(storageKeyXP, xp);
+    localStorage.setItem(storageKeyGeslaagd, geslaagd ? '1' : '0');
+
     const message = geslaagd 
       ? `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
            Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
@@ -105,10 +117,14 @@ function showExercise(){
       </div>
     `;
 
-    // bind click-handler direct na toevoegen
+    // knop terug naar kaart
     document.getElementById('LVL101backBtn').onclick = () => {
+      // Voor iframe situatie
       if(window.completeLevelFromIframe){
         window.completeLevelFromIframe(xp, geslaagd);
+      } else {
+        // Anders: terug naar hoofdpagina
+        window.location.href = '../index.html'; // pas aan naar jouw kaart-pagina
       }
     };
     return;
