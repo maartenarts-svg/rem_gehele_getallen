@@ -4,125 +4,23 @@
 <meta charset="UTF-8">
 <title>Level 1 - Pijlenvoorstelling (Controle)</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 30px;
-  background: #f7f9fc;
-}
-
-h1 {
-  color: #2c3e50;
-  margin-bottom: 25px;
-  max-width: 500px;
-  margin-left:auto;
-  margin-right:auto;
-  font-size: 20px;
-}
-
-#LVL101exercise {
-  margin-bottom: 25px;
-  font-size: 20px;
-}
-
-#LVL101choices {
-  display: grid;
-  grid-template-columns: repeat(2, 400px);
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 25px;
-}
-
-.choice {
-  border: 1px solid #ccc;
-  border-radius: 15px;
-  padding: 15px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: 0.3s;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.choice:hover {
-  background-color: #e0f0ff;
-  transform: translateY(-2px);
-}
-
-.choice.selected {
-  border: 3px solid #007BFF;
-}
-
-#LVL101feedback {
-  display: none;
-  font-weight: bold;
-  margin-top: 10px;
-  text-align: left;
-  max-width: 500px;
-  margin-left:auto;
-  margin-right:auto;
-  background-color: #fff9e6;
-  padding: 12px 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-svg {
-  width: 360px;
-  height: 60px;
-}
-
-button {
-  padding: 12px 25px;
-  margin-top: 10px;
-  cursor: pointer;
-  border-radius: 12px;
-  border: none;
-  background-color: #007BFF;
-  color: #fff;
-  font-size: 16px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-  transition: 0.2s;
-}
-
-button:hover:enabled {
-  background-color: #0056b3;
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-#LVL101nextBtn {
-  background-color: #28a745;
-}
-
-#LVL101nextBtn:hover:enabled {
-  background-color: #1e7e34;
-}
-
-#LVL101progressContainer {
-  width: 80%;
-  height: 18px;
-  background: #e6e6e6;
-  border-radius: 10px;
-  margin: 20px auto 30px auto;
-  overflow: hidden;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-}
-
-#LVL101progressBar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #6ddf4b, #4cc936);
-  transition: width 0.4s ease;
-}
+body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f7f9fc; }
+h1 { color: #2c3e50; margin-bottom: 25px; max-width: 500px; margin-left:auto; margin-right:auto; font-size: 20px; }
+#LVL101exercise { margin-bottom: 25px; font-size: 20px; }
+#LVL101choices { display: grid; grid-template-columns: repeat(2, 400px); gap: 20px; justify-content: center; margin-bottom: 25px; }
+.choice { border: 1px solid #ccc; border-radius: 15px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: 0.3s; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.choice:hover { background-color: #e0f0ff; transform: translateY(-2px); }
+.choice.selected { border: 3px solid #007BFF; }
+#LVL101feedback { display: none; font-weight: bold; margin-top: 10px; text-align: left; max-width: 500px; margin-left:auto; margin-right:auto; background-color: #fff9e6; padding: 12px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+svg { width: 360px; height: 60px; }
+button { padding: 12px 25px; margin-top: 10px; cursor: pointer; border-radius: 12px; border: none; background-color: #007BFF; color: #fff; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: 0.2s; }
+button:hover:enabled { background-color: #0056b3; transform: translateY(-1px); }
+button:disabled { opacity: 0.5; cursor: default; }
+#LVL101nextBtn { background-color: #28a745; }
+#LVL101nextBtn:hover:enabled { background-color: #1e7e34; }
+#LVL101progressContainer { width: 80%; height: 18px; background: #e6e6e6; border-radius: 10px; margin: 20px auto 30px auto; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+#LVL101progressBar { height: 100%; width: 0%; background: linear-gradient(90deg, #6ddf4b, #4cc936); transition: width 0.4s ease; }
 </style>
-
 </head>
 <body>
 
@@ -165,10 +63,8 @@ function generateUniqueExercises(num) {
       case 4: a = -rand(1,5); b = rand(6,10); op = '+'; break;
       case 5: a = -rand(1,10); b = rand(1,8); op = '-'; break;
     }
-
     if(op==='-' && a===b) continue;
     if(op==='+' && a===-b) continue;
-
     const key = `${a}${op}${b}`;
     if(!set.has(key)) {
       set.add(key);
@@ -183,30 +79,27 @@ let selectedChoice = null;
 
 function showExercise(){
   updateProgressBar();
+  
+  const exerciseDiv = document.getElementById('LVL101exercise');
+  const choicesDiv = document.getElementById('LVL101choices');
+  const fb = document.getElementById('LVL101feedback');
+  const checkBtn = document.getElementById('LVL101checkBtn');
+  const nextBtn = document.getElementById('LVL101nextBtn');
+
   if(currentIndex >= exercises.length){
-
-    const exerciseDiv = document.getElementById('LVL101exercise');
-    const choicesDiv = document.getElementById('LVL101choices');
-    const fb = document.getElementById('LVL101feedback');
-    const checkBtn = document.getElementById('LVL101checkBtn');
-    const nextBtn = document.getElementById('LVL101nextBtn');
-
     choicesDiv.innerHTML = '';
     checkBtn.style.display = 'none';
     nextBtn.style.display = 'none';
     fb.style.display = 'none';
 
     let geslaagd = xp >= 12;
-    let message = "";
-    if(geslaagd){
-        message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
-                     Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
-                   </div>`;
-    } else {
-        message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
-                     Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.
-                   </div>`;
-    }
+    let message = geslaagd 
+      ? `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+           Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+         </div>`
+      : `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+           Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.
+         </div>`;
 
     exerciseDiv.innerHTML = `
       <div style="background:white; padding:25px; border-radius:20px; 
@@ -218,11 +111,11 @@ function showExercise(){
       </div>
     `;
 
-    // knop terug naar kaart
-    document.getElementById('LVL101backBtn').onclick = ()=>{
-        if(window.completeLevelFromIframe){
-            window.completeLevelFromIframe(xp, geslaagd); // XP en geslaagd/niet geslaagd doorgeven
-        }
+    // knop terug naar kaart pas binden nadat knop bestaat
+    document.getElementById('LVL101backBtn').onclick = ()=> {
+      if(window.completeLevelFromIframe){
+        window.completeLevelFromIframe(xp, geslaagd);
+      }
     };
 
     return;
@@ -230,17 +123,10 @@ function showExercise(){
 
   const ex = exercises[currentIndex];
   selectedChoice = null;
-
-  document.getElementById('LVL101exercise').innerHTML = `<h2>${ex.a} ${ex.op} ${ex.b}</h2>`;
-  const fb = document.getElementById('LVL101feedback');
+  exerciseDiv.innerHTML = `<h2>${ex.a} ${ex.op} ${ex.b}</h2>`;
   fb.innerText = '';
   fb.style.display = 'none';
-
-  const choicesDiv = document.getElementById('LVL101choices');
   choicesDiv.innerHTML = '';
-
-  const checkBtn = document.getElementById('LVL101checkBtn');
-  const nextBtn = document.getElementById('LVL101nextBtn');
 
   checkBtn.disabled = true;
   checkBtn.style.display = 'inline-block';
@@ -266,7 +152,6 @@ function showExercise(){
     choice.className='choice';
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-
     const line = document.createElementNS("http://www.w3.org/2000/svg","line");
     line.setAttribute("x1",0); line.setAttribute("y1",50);
     line.setAttribute("x2",360); line.setAttribute("y2",50);
@@ -301,7 +186,7 @@ function showExercise(){
 
     choice.appendChild(svg);
 
-    choice.onclick = ()=>{
+    choice.onclick = ()=> {
       if(selectedChoice!==null) choicesDiv.children[selectedChoice].classList.remove('selected');
       selectedChoice = idx;
       choice.classList.add('selected');
@@ -321,22 +206,13 @@ function showExercise(){
 
     let feedbackText='';
 
-    for(let i=0;i<children.length;i++){
-      children[i].style.pointerEvents='none';
-    }
-
-    const fb = document.getElementById('LVL101feedback');
+    for(let i=0;i<children.length;i++){ children[i].style.pointerEvents='none'; }
 
     if(selectedChoice===correctIndex){
       children[selectedChoice].style.backgroundColor='lightgreen';
       fb.innerText='✅ Correct!';
       fb.style.display='block';
-      if(currentIndex < 5) {
-        xp += 1;
-      }
-      else {
-        xp += 2;
-      }
+      xp += (currentIndex < 5) ? 1 : 2;
     } else {
       children[selectedChoice].style.backgroundColor='#ffcccc'; 
       children[correctIndex].style.backgroundColor='lightgreen'; 
@@ -350,11 +226,8 @@ function showExercise(){
       if(dir1===correctDir1 && dir2===correctDir2){
         const absA = Math.abs(ex.a);
         const absB = Math.abs(ex.b);
-        if(absB>absA){
-          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.<br>`;
-        } else if(absB<absA){
-          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de kleinste absolute waarde. De tweede (bovenste) pijl moet dus korter zijn dan de eerste pijl.<br>`;
-        }
+        if(absB>absA){ feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.<br>`; }
+        else if(absB<absA){ feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de kleinste absolute waarde. De tweede (bovenste) pijl moet dus korter zijn dan de eerste pijl.<br>`; }
       }
       fb.innerHTML=feedbackText;
       fb.style.display='block';
@@ -362,6 +235,11 @@ function showExercise(){
 
     checkBtn.style.display='none';
     nextBtn.style.display='inline-block';
+  };
+
+  nextBtn.onclick = ()=>{
+    currentIndex++;
+    showExercise();
   };
 }
 
@@ -383,15 +261,9 @@ function drawArrow(svg,x1,y1,x2,y2,color){
   svg.appendChild(arrow);
 }
 
-document.getElementById('LVL101nextBtn').onclick = ()=>{
-  currentIndex++;
-  showExercise();
-};
-
-function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
 showExercise();
 </script>
-
 </body>
 </html>
