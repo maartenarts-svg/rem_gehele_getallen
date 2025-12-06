@@ -4,23 +4,125 @@
 <meta charset="UTF-8">
 <title>Level 1 - Pijlenvoorstelling (Controle)</title>
 <style>
-body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background: #f7f9fc; }
-h1 { color: #2c3e50; margin-bottom: 25px; max-width: 500px; margin-left:auto; margin-right:auto; font-size: 20px; }
-#LVL101exercise { margin-bottom: 25px; font-size: 20px; }
-#LVL101choices { display: grid; grid-template-columns: repeat(2, 400px); gap: 20px; justify-content: center; margin-bottom: 25px; }
-.choice { border: 1px solid #ccc; border-radius: 15px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: 0.3s; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-.choice:hover { background-color: #e0f0ff; transform: translateY(-2px); }
-.choice.selected { border: 3px solid #007BFF; }
-#LVL101feedback { display: none; font-weight: bold; margin-top: 10px; text-align: left; max-width: 500px; margin-left:auto; margin-right:auto; background-color: #fff9e6; padding: 12px 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-svg { width: 360px; height: 60px; }
-button { padding: 12px 25px; margin-top: 10px; cursor: pointer; border-radius: 12px; border: none; background-color: #007BFF; color: #fff; font-size: 16px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: 0.2s; }
-button:hover:enabled { background-color: #0056b3; transform: translateY(-1px); }
-button:disabled { opacity: 0.5; cursor: default; }
-#LVL101nextBtn { background-color: #28a745; }
-#LVL101nextBtn:hover:enabled { background-color: #1e7e34; }
-#LVL101progressContainer { width: 80%; height: 18px; background: #e6e6e6; border-radius: 10px; margin: 20px auto 30px auto; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
-#LVL101progressBar { height: 100%; width: 0%; background: linear-gradient(90deg, #6ddf4b, #4cc936); transition: width 0.4s ease; }
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left:auto;
+  margin-right:auto;
+  font-size: 20px;
+}
+
+#LVL101exercise {
+  margin-bottom: 25px;
+  font-size: 20px;
+}
+
+#LVL101choices {
+  display: grid;
+  grid-template-columns: repeat(2, 400px);
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.choice {
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.choice:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.choice.selected {
+  border: 3px solid #007BFF;
+}
+
+#LVL101feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left:auto;
+  margin-right:auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+svg {
+  width: 360px;
+  height: 60px;
+}
+
+button {
+  padding: 12px 25px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL101nextBtn {
+  background-color: #28a745;
+}
+
+#LVL101nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL101progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL101progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
 </style>
+
 </head>
 <body>
 
@@ -43,36 +145,35 @@ let currentIndex = 0;
 let exercises = [];
 let xp = 0;
 
-// LocalStorage sleutels
-const storageKeyXP = 'level1_xp';
-const storageKeyGeslaagd = 'level1_geslaagd';
-
-// Laad eerder opgeslagen XP
-if(localStorage.getItem(storageKeyXP)){
-  xp = parseInt(localStorage.getItem(storageKeyXP));
-}
-
 function updateProgressBar() {
-  document.getElementById('LVL101progressBar').style.width = (currentIndex / numExercises * 100) + "%";
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL101progressBar').style.width = percentage + "%";
 }
 
 function generateUniqueExercises(num) {
   const set = new Set();
   const list = [];
+
   while(list.length < num) {
     const form = Math.floor(Math.random()*6); 
     let a,b,op;
     switch(form){
-      case 0: a = rand(1,10); b = rand(1,10); op='+'; break;
-      case 1: a = rand(1,10); b = rand(1,a-1); op='-'; break;
-      case 2: a = rand(1,10); b = rand(a+1,15); op='-'; break;
-      case 3: a = -rand(1,10); b = rand(1,8); op='+'; break;
-      case 4: a = -rand(1,5); b = rand(6,10); op='+'; break;
-      case 5: a = -rand(1,10); b = rand(1,8); op='-'; break;
+      case 0: a = rand(1,10); b = rand(1,10); op = '+'; break;
+      case 1: a = rand(1,10); b = rand(1,a-1); op = '-'; break;
+      case 2: a = rand(1,10); b = rand(a+1,15); op = '-'; break;
+      case 3: a = -rand(1,10); b = rand(1,8); op = '+'; break;
+      case 4: a = -rand(1,5); b = rand(6,10); op = '+'; break;
+      case 5: a = -rand(1,10); b = rand(1,8); op = '-'; break;
     }
-    if((op==='-' && a===b)||(op==='+' && a===-b)) continue;
+
+    if(op==='-' && a===b) continue;
+    if(op==='+' && a===-b) continue;
+
     const key = `${a}${op}${b}`;
-    if(!set.has(key)){ set.add(key); list.push({a,b,op}); }
+    if(!set.has(key)) {
+      set.add(key);
+      list.push({a,b,op});
+    }
   }
   return list;
 }
@@ -82,30 +183,30 @@ let selectedChoice = null;
 
 function showExercise(){
   updateProgressBar();
-  
-  const exerciseDiv = document.getElementById('LVL101exercise');
-  const choicesDiv = document.getElementById('LVL101choices');
-  const fb = document.getElementById('LVL101feedback');
-  const checkBtn = document.getElementById('LVL101checkBtn');
-  const nextBtn = document.getElementById('LVL101nextBtn');
-
   if(currentIndex >= exercises.length){
+
+    const exerciseDiv = document.getElementById('LVL101exercise');
+    const choicesDiv = document.getElementById('LVL101choices');
+    const fb = document.getElementById('LVL101feedback');
+    const checkBtn = document.getElementById('LVL101checkBtn');
+    const nextBtn = document.getElementById('LVL101nextBtn');
+
     choicesDiv.innerHTML = '';
     checkBtn.style.display = 'none';
     nextBtn.style.display = 'none';
     fb.style.display = 'none';
 
-    const geslaagd = xp >= 12;
-    localStorage.setItem(storageKeyXP, xp);
-    localStorage.setItem(storageKeyGeslaagd, geslaagd ? '1' : '0');
-
-    const message = geslaagd 
-      ? `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
-           Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
-         </div>`
-      : `<div style="color:#b30000; font-size:18px; margin-top:10px;">
-           Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.
-         </div>`;
+    let geslaagd = xp >= 12;
+    let message = "";
+    if(geslaagd){
+        message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                     Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+                   </div>`;
+    } else {
+        message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                     Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.
+                   </div>`;
+    }
 
     exerciseDiv.innerHTML = `
       <div style="background:white; padding:25px; border-radius:20px; 
@@ -117,45 +218,67 @@ function showExercise(){
       </div>
     `;
 
-    // knop terug naar kaart
-    document.getElementById('LVL101backBtn').onclick = () => {
-      // Voor iframe situatie
-      if(window.completeLevelFromIframe){
-        window.completeLevelFromIframe(xp, geslaagd);
-      } else {
-        // Anders: terug naar hoofdpagina
-        window.location.href = 'index.html'; // pas aan naar jouw kaart-pagina
-      }
+    // knop terug naar kaart werkt nu via parent window
+    document.getElementById('LVL101backBtn').onclick = ()=>{
+        if(window.parent.completeLevelFromIframe){
+            window.parent.completeLevelFromIframe(xp, geslaagd);
+        }
     };
+
     return;
   }
 
   const ex = exercises[currentIndex];
   selectedChoice = null;
-  exerciseDiv.innerHTML = `<h2>${ex.a} ${ex.op} ${ex.b}</h2>`;
-  fb.innerText = ''; fb.style.display = 'none';
+
+  document.getElementById('LVL101exercise').innerHTML = `<h2>${ex.a} ${ex.op} ${ex.b}</h2>`;
+  const fb = document.getElementById('LVL101feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const choicesDiv = document.getElementById('LVL101choices');
   choicesDiv.innerHTML = '';
+
+  const checkBtn = document.getElementById('LVL101checkBtn');
+  const nextBtn = document.getElementById('LVL101nextBtn');
+
   checkBtn.disabled = true;
   checkBtn.style.display = 'inline-block';
   nextBtn.style.display = 'none';
 
+  const absA = Math.abs(ex.a);
+  const absB = Math.abs(ex.b);
+  let maxVal = Math.max(absA, absB);
+  let minVal = Math.min(absA, absB);
+
   const opts = [
     [{dir:'right',value:ex.a},{dir:'right',value:ex.b}],
-    [{dir:'right',value:ex.a},{dir:'left',value:ex.b}],
-    [{dir:'right',value:ex.b},{dir:'left',value:ex.a}],
-    [{dir:'left',value:ex.b},{dir:'right',value:ex.a}],
-    [{dir:'left',value:ex.a},{dir:'right',value:ex.b}],
+    [{dir:'right',value:'max'},{dir:'left',value:'min'}],
+    [{dir:'right',value:'min'},{dir:'left',value:'max'}],
+    [{dir:'left',value:'max'},{dir:'right',value:'min'}],
+    [{dir:'left',value:'min'},{dir:'right',value:'max'}],
     [{dir:'left',value:ex.a},{dir:'left',value:ex.b}]
   ];
 
+  opts.forEach(arr=>{
+    arr.forEach(p=>{
+      if(p.value==='max') p.value = maxVal;
+      if(p.value==='min') p.value = minVal;
+    });
+  });
+
   let correctIndex;
-  if(ex.op==='+' && ex.a>0 && ex.b>0) correctIndex=0;
-  else if(ex.op==='-' && ex.a>0 && ex.b>0) correctIndex=1;
-  else if(ex.op==='+' && ex.a<0 && ex.b>0) correctIndex=4;
-  else if(ex.op==='-' && ex.a<0 && ex.b>0) correctIndex=5;
+  if(ex.op==='+' && ex.a>0 && ex.b>0) correctIndex = 0;
+  else if(ex.op==='-' && ex.a>0 && ex.b>0 && (ex.a-ex.b)>0) correctIndex = 1;
+  else if(ex.op==='-' && ex.a>0 && ex.b>0 && (ex.a-ex.b)<0) correctIndex = 2;
+  else if(ex.op==='+' && ex.a<0 && ex.b>0 && (ex.a+ex.b)<0) correctIndex = 3;
+  else if(ex.op==='+' && ex.a<0 && ex.b>0 && (ex.a+ex.b)>0) correctIndex = 4;
+  else if(ex.op==='-' && ex.a<0 && ex.b>0) correctIndex = 5;
 
   opts.forEach((arr, idx)=>{
-    const choice = document.createElement('div'); choice.className='choice';
+    const choice = document.createElement('div');
+    choice.className='choice';
+
     const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
 
     const line = document.createElementNS("http://www.w3.org/2000/svg","line");
@@ -175,25 +298,27 @@ function showExercise(){
     zeroText.setAttribute("font-size","12"); zeroText.textContent="0";
     svg.appendChild(zeroText);
 
-    const absA = Math.abs(arr[0].value); const absB = Math.abs(arr[1].value);
+    const absA = Math.abs(arr[0].value);
+    const absB = Math.abs(arr[1].value);
     const maxAbs = Math.max(absA, absB);
     const firstLength = maxLength * (absA / maxAbs);
     const secondLength = maxLength * (absB / maxAbs);
 
     const firstX = arr[0].dir==='right'? firstLength : -firstLength;
     const secondX = arr[1].dir==='right'? secondLength : -secondLength;
-    const endFirstX = centerX + firstX;
-    const endSecondX = endFirstX + secondX;
 
-    drawArrow(svg, centerX,30,endFirstX,30,arr[0].dir==='right'?'blue':'orange');
-    drawArrow(svg, endFirstX,10,endSecondX,10,arr[1].dir==='right'?'blue':'orange');
+    drawArrow(svg, centerX, 30, centerX + firstX, 30, arr[0].dir==='right'?'blue':'orange');
+    drawArrow(svg, centerX + firstX, 10, centerX + firstX + secondX, 10, arr[1].dir==='right'?'blue':'orange');
 
     choice.appendChild(svg);
-    choice.onclick = ()=> {
+
+    choice.onclick = ()=>{
       if(selectedChoice!==null) choicesDiv.children[selectedChoice].classList.remove('selected');
-      selectedChoice = idx; choice.classList.add('selected');
+      selectedChoice = idx;
+      choice.classList.add('selected');
       checkBtn.disabled = false;
     };
+
     choicesDiv.appendChild(choice);
   });
 
@@ -206,43 +331,78 @@ function showExercise(){
     const correctDir2 = (ex.op==='+'? (ex.b>0?'rechts':'links') : (ex.b>0?'links':'rechts'));
 
     let feedbackText='';
-    for(let i=0;i<children.length;i++){ children[i].style.pointerEvents='none'; }
+
+    for(let i=0;i<children.length;i++){
+      children[i].style.pointerEvents='none';
+    }
+
+    const fb = document.getElementById('LVL101feedback');
 
     if(selectedChoice===correctIndex){
       children[selectedChoice].style.backgroundColor='lightgreen';
-      fb.innerText='✅ Correct!'; fb.style.display='block';
-      xp += (currentIndex < 5)?1:2;
+      fb.innerText='✅ Correct!';
+      fb.style.display='block';
+      if(currentIndex < 5) {
+        xp += 1;
+      }
+      else {
+        xp += 2;
+      }
     } else {
-      children[selectedChoice].style.backgroundColor='#ffcccc';
-      children[correctIndex].style.backgroundColor='lightgreen';
-      if(dir1!==correctDir1) feedbackText += `Eerste pijl moet naar ${correctDir1}.<br>`;
-      if(dir2!==correctDir2) feedbackText += `Tweede pijl moet naar ${correctDir2}.<br>`;
-      fb.innerHTML = feedbackText; fb.style.display='block';
+      children[selectedChoice].style.backgroundColor='#ffcccc'; 
+      children[correctIndex].style.backgroundColor='lightgreen'; 
+
+      if(dir1!==correctDir1){
+        feedbackText += `Bij jou gaat de eerste (onderste) pijl naar ${dir1}. Maar het eerste getal is ${ex.a>0?'positief':'negatief'}, dus moet de eerste pijl naar ${correctDir1} gaan.<br>`;
+      }
+      if(dir2!==correctDir2){
+        feedbackText += `Bij jou gaat de tweede (bovenste) pijl naar ${dir2}. Maar je ${ex.op==='+'?'telt':'trekt'} een ${ex.b>0?'positief':'negatief'} getal ${ex.op==='+'?'op':'af'}, dus de tweede pijl moet naar ${correctDir2} gaan.<br>`;
+      }
+      if(dir1===correctDir1 && dir2===correctDir2){
+        const absA = Math.abs(ex.a);
+        const absB = Math.abs(ex.b);
+        if(absB>absA){
+          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.<br>`;
+        } else if(absB<absA){
+          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de kleinste absolute waarde. De tweede (bovenste) pijl moet dus korter zijn dan de eerste pijl.<br>`;
+        }
+      }
+      fb.innerHTML=feedbackText;
+      fb.style.display='block';
     }
 
-    checkBtn.style.display='none'; nextBtn.style.display='inline-block';
+    checkBtn.style.display='none';
+    nextBtn.style.display='inline-block';
   };
-
-  nextBtn.onclick = ()=>{ currentIndex++; showExercise(); };
 }
 
 function drawArrow(svg,x1,y1,x2,y2,color){
   const line = document.createElementNS("http://www.w3.org/2000/svg","line");
   line.setAttribute("x1",x1); line.setAttribute("y1",y1);
   line.setAttribute("x2",x2); line.setAttribute("y2",y2);
-  line.setAttribute("stroke",color); line.setAttribute("stroke-width",2); svg.appendChild(line);
+  line.setAttribute("stroke",color); line.setAttribute("stroke-width",2);
+  svg.appendChild(line);
 
   const markerSize = 5;
   const arrow = document.createElementNS("http://www.w3.org/2000/svg","polygon");
-  if(x2>x1) arrow.setAttribute("points",`${x2},${y2} ${x2-markerSize},${y2-markerSize/2} ${x2-markerSize},${y2+markerSize/2}`);
-  else arrow.setAttribute("points",`${x2},${y2} ${x2+markerSize},${y2-markerSize/2} ${x2+markerSize},${y2+markerSize/2}`);
-  arrow.setAttribute("fill",color); svg.appendChild(arrow);
+  if(x2>x1){
+    arrow.setAttribute("points",`${x2},${y2} ${x2-markerSize},${y2-markerSize/2} ${x2-markerSize},${y2+markerSize/2}`);
+  } else {
+    arrow.setAttribute("points",`${x2},${y2} ${x2+markerSize},${y2-markerSize/2} ${x2+markerSize},${y2+markerSize/2}`);
+  }
+  arrow.setAttribute("fill",color);
+  svg.appendChild(arrow);
 }
 
-function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+document.getElementById('LVL101nextBtn').onclick = ()=>{
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
 showExercise();
 </script>
+
 </body>
 </html>
-
