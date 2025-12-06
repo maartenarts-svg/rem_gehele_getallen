@@ -166,6 +166,7 @@ function generateUniqueExercises(num) {
       case 5: a = -rand(1,10); b = rand(1,8); op = '-'; break;
     }
 
+    if(a === b) continue;
     if(op==='-' && a===b) continue;
     if(op==='+' && a===-b) continue;
 
@@ -406,3 +407,4 @@ showExercise();
 
 </body>
 </html>
+
