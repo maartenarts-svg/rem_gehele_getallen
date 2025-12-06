@@ -122,7 +122,6 @@ button:disabled {
   transition: width 0.4s ease;
 }
 </style>
-
 </head>
 <body>
 
@@ -219,7 +218,6 @@ function showExercise(){
       </div>
     `;
 
-    // knop terug naar kaart werkt nu via parent window
     document.getElementById('LVL101backBtn').onclick = ()=>{
         if(window.parent.completeLevelFromIframe){
             window.parent.completeLevelFromIframe(xp, geslaagd);
@@ -301,9 +299,10 @@ function showExercise(){
 
     const absA = Math.abs(arr[0].value);
     const absB = Math.abs(arr[1].value);
-    const maxAbs = Math.max(absA, absB);
-    const firstLength = maxLength * (absA / maxAbs);
-    const secondLength = maxLength * (absB / maxAbs);
+
+    // Vaste lengte: langste = 90px, kortste = 45px
+    const firstLength = Math.max(absA, absB) === absA ? 90 : 45;
+    const secondLength = Math.max(absA, absB) === absB ? 90 : 45;
 
     const firstX = arr[0].dir==='right'? firstLength : -firstLength;
     const secondX = arr[1].dir==='right'? secondLength : -secondLength;
@@ -359,15 +358,6 @@ function showExercise(){
       if(dir2!==correctDir2){
         feedbackText += `Bij jou gaat de tweede (bovenste) pijl naar ${dir2}. Maar je ${ex.op==='+'?'telt':'trekt'} een ${ex.b>0?'positief':'negatief'} getal ${ex.op==='+'?'op':'af'}, dus de tweede pijl moet naar ${correctDir2} gaan.<br>`;
       }
-      if(dir1===correctDir1 && dir2===correctDir2){
-        const absA = Math.abs(ex.a);
-        const absB = Math.abs(ex.b);
-        if(absB>absA){
-          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.<br>`;
-        } else if(absB<absA){
-          feedbackText += `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de kleinste absolute waarde. De tweede (bovenste) pijl moet dus korter zijn dan de eerste pijl.<br>`;
-        }
-      }
       fb.innerHTML=feedbackText;
       fb.style.display='block';
     }
@@ -407,5 +397,3 @@ showExercise();
 
 </body>
 </html>
-
-
