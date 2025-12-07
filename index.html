@@ -77,6 +77,23 @@ const LEVELS = {
     };
   },
 
+  "1-2": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+
+    lc.innerHTML = `
+      <iframe src="lvl102.html" style="width:100%;height:100%;border:none;"></iframe>
+    `;
+    lc.style.display='block';
+
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){
+      const levelId = "1-2";
+      completeLevel(levelId, verdiendeXP, geslaagd);
+  };
+},
+
+  
   // toekomstige echte levels kunnen hier op dezelfde manier
 };
 
@@ -348,4 +365,5 @@ drawMap();
 </script>
 </body>
 </html>
+
 
