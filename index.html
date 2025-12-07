@@ -199,15 +199,6 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
   document.getElementById('mapContainer').style.display='block';
   document.getElementById('xpDisplay').style.display='block';
 
-// --- Verzenden naar Google Sheet via formulier ---
-document.getElementById('formLearnerName').value = localStorage.getItem('studentFirstName') + " " + localStorage.getItem('studentLastName');
-document.getElementById('formLevelId').value = levelId;
-document.getElementById('formXP').value = verdiendeXP;
-document.getElementById('formResult').value = geslaagd ? "Geslaagd" : "Niet geslaagd";
-
-// submit het formulier
-document.getElementById('scoreForm').submit();
-    
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
     messageBox.innerText = `⚠️ Je bent gefaald bij level ${levelId}. Probeer het opnieuw.`;
@@ -279,7 +270,7 @@ function drawMap(){
     const startLabel=document.createElement('div');
     startLabel.className='route-label';
     startLabel.style.top=YS+'px';
-    startLabel.innerText='START1';
+    startLabel.innerText='START';
     container.appendChild(startLabel);
     let lastLevelY=0, prevX=XS, prevY=YS+45/2;
     lesson.levels.forEach((lvl,idx)=>{
@@ -372,29 +363,5 @@ if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
 checkStudent();
 
 </script>
-
-  <form id="scoreForm" action="https://script.google.com/macros/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec" method="post" target="hidden_iframe">
-  <input type="hidden" name="learnerName" id="formLearnerName">
-  <input type="hidden" name="levelId" id="formLevelId">
-  <input type="hidden" name="xp" id="formXP">
-  <input type="hidden" name="result" id="formResult">
-</form>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
-<h2>Test formulier</h2>
-<form action="https://script.google.com/macros/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec" method="post" target="hidden_iframe">
-  <label>Naam: <input type="text" name="learnerName" value="Test Naam"></label><br>
-  <label>Level: <input type="text" name="levelId" value="1-1"></label><br>
-  <label>XP: <input type="text" name="xp" value="10"></label><br>
-  <label>Resultaat: <input type="text" name="result" value="Geslaagd"></label><br>
-  <button type="submit">Verstuur naar Sheet</button>
-</form>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
-  
 </body>
 </html>
-
-
-
-
