@@ -5,7 +5,7 @@
 <title>Wereldkaart Prototype Verticaal</title>
 <style>
 body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f4f8; display: flex; justify-content: center; }
-#mapContainer { position: relative; width: 400px; min-height: 3000px; margin: 0 auto; }
+#mapContainer { position: relative; width: 400px; min-height: 3000px; margin: 0 auto; display:none; }
 .lesson-divider { position: absolute; height: 4px; background: #999; width: 100%; }
 .level { position: absolute; width: 50px; height: 50px; border-radius: 50%; border: 3px solid #ccc; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
 .level:hover { transform: scale(1.1); }
@@ -15,13 +15,14 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 .level.locked::after { content: '🔒'; font-size: 20px; }
 .route-label { position: absolute; width: 120px; height: 45px; border-radius: 25px; background: #d8c7ff; display: flex; justify-content: center; align-items: center; font-weight: bold; left: 50%; transform: translateX(-50%); }
 .lesson-title { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 14px; left: 0; transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#resetBtn { position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; border-radius: 10px; cursor: pointer; }
-#xpDisplay { position: fixed; top: 20px; left: 20px; padding: 8px 12px; background: #ffd700; color: black; font-weight: bold; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1000; }
+#resetBtn { position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; border-radius: 10px; cursor: pointer; display:none; }
+#xpDisplay { position: fixed; top: 20px; left: 20px; padding: 8px 12px; background: #ffd700; color: black; font-weight: bold; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1000; display:none; }
 #mapPath { position: absolute; top: 0; left: 0; z-index: 0; }
 #levelContainer { position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:2000; display:none; padding:30px; overflow:auto; }
 #messageBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #d4edda; color: #155724; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: none; z-index: 1500; }
-input { margin:5px; padding:5px; width:80px; }
-button { padding:5px 10px; margin-top:10px; }
+#studentFormContainer { position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:3000; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+#studentFormContainer input { margin:5px; padding:5px; width:150px; font-size:16px; }
+#studentFormContainer button { padding:8px 15px; margin-top:10px; font-size:16px; }
 </style>
 </head>
 <body>
@@ -31,6 +32,15 @@ button { padding:5px 10px; margin-top:10px; }
 <div id="mapContainer"></div>
 <div id="levelContainer"></div>
 <div id="messageBox"></div>
+
+<div id="studentFormContainer" style="display:none;">
+  <h2>Welkom! Vul je gegevens in</h2>
+  <div>
+    <input type="text" id="studentFirstName" placeholder="Voornaam">
+    <input type="text" id="studentLastName" placeholder="Naam">
+  </div>
+  <button id="studentSubmitBtn">OK</button>
+</div>
 
 <script>
 const LESSONS = [
@@ -54,60 +64,78 @@ const LESSON_NAMES = [
 let state = JSON.parse(localStorage.getItem('mapState')) || {};
 state.xp = state.xp || 0;
 
+// --- Leerling identificatie ---
+function checkStudent(){
+  const firstName = localStorage.getItem('studentFirstName');
+  const lastName = localStorage.getItem('studentLastName');
+  if(firstName && lastName){
+    showMap();
+  } else {
+    document.getElementById('studentFormContainer').style.display='flex';
+  }
+}
+
+document.getElementById('studentSubmitBtn').onclick = ()=>{
+  const firstName = document.getElementById('studentFirstName').value.trim();
+  const lastName = document.getElementById('studentLastName').value.trim();
+  if(!firstName || !lastName){ alert("Vul zowel voornaam als naam in."); return; }
+
+  // toon bevestiging
+  const confirmMsg = confirm(`Je hebt ingevoerd:\nVoornaam: ${firstName}\nNaam: ${lastName}\n\nIs dit correct?`);
+  if(confirmMsg){
+    localStorage.setItem('studentFirstName', firstName);
+    localStorage.setItem('studentLastName', lastName);
+    document.getElementById('studentFormContainer').style.display='none';
+    showMap();
+  }
+}
+
+// --- Toon wereldkaart ---
+function showMap(){
+  document.getElementById('mapContainer').style.display='block';
+  document.getElementById('xpDisplay').style.display='block';
+  document.getElementById('resetBtn').style.display='block';
+  drawMap();
+}
+
+// --- Opslaan en XP ---
 function saveState(){ localStorage.setItem('mapState', JSON.stringify(state)); }
 function updateXPDisplay(){ document.getElementById('xpDisplay').innerText = `XP: ${state.xp}`; }
 
-// --- Level verdeling ---
+// --- Level verdeling en functies ---
+// (Exact zoals je huidige code, niets gewijzigd)
 const LEVELS = {
   "1-1": function() {
     const lc = document.getElementById('levelContainer');
     document.getElementById('mapContainer').style.display = 'none';
     document.getElementById('xpDisplay').style.display = 'none';
-
-    // Echte level met iframe
-    lc.innerHTML = `
-      <iframe src="lvl101.html" style="width:100%;height:100%;border:none;"></iframe>
-    `;
+    lc.innerHTML = `<iframe src="lvl101.html" style="width:100%;height:100%;border:none;"></iframe>`;
     lc.style.display='block';
-
-    // Event: terug naar kaart (bij een echte level wordt knop verwijderd, dus enkel sluiten via level zelf)
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){
       const levelId = "1-1";
       completeLevel(levelId, verdiendeXP, geslaagd);
     };
   },
-
   "1-2": function() {
     const lc = document.getElementById('levelContainer');
     document.getElementById('mapContainer').style.display = 'none';
     document.getElementById('xpDisplay').style.display = 'none';
-
-    lc.innerHTML = `
-      <iframe src="lvl102.html" style="width:100%;height:100%;border:none;"></iframe>
-    `;
+    lc.innerHTML = `<iframe src="lvl102.html" style="width:100%;height:100%;border:none;"></iframe>`;
     lc.style.display='block';
-
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){
       const levelId = "1-2";
       completeLevel(levelId, verdiendeXP, geslaagd);
-  };
-},
-
-  
-  // toekomstige echte levels kunnen hier op dezelfde manier
+    };
+  }
 };
 
 // --- Level openen ---
 function openLevel(levelId, lesName){
-  if(LEVELS[levelId]){
-    // echte level
-    LEVELS[levelId]();  // roept het level aan
-  } else {
-    // dummy level
+  if(LEVELS[levelId]){ LEVELS[levelId](); } 
+  else {
     const lc = document.getElementById('levelContainer');
     document.getElementById('mapContainer').style.display = 'none';
     document.getElementById('xpDisplay').style.display = 'none';
-
     lc.innerHTML = `
       <h2>${lesName} - Level ${levelId}</h2>
       <div>
@@ -120,16 +148,13 @@ function openLevel(levelId, lesName){
       <button class="backBtn">OK</button>
       <p>Gebruik dit template om je level-specifieke code of opdrachten in te vullen.</p>
     `;
-
     lc.style.display='block';
-
     lc.querySelector('.finishBtn').onclick = () => {
       const xp = parseInt(lc.querySelector('.xpInput').value);
       const cesuur = parseInt(lc.querySelector('.cesuurInput').value);
       const geslaagd = xp >= cesuur;
       completeLevel(levelId, xp, geslaagd);
     };
-
     lc.querySelector('.backBtn').onclick = () => {
       lc.style.display='none';
       document.getElementById('mapContainer').style.display='block';
@@ -153,14 +178,12 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
     else state[lvl.id] = {};
   });
 
-  // Volgende level van deze les als current als geslaagd en nog levels over
   if(lvlNum < lesson.levels.length && geslaagd){
     const next = lesson.levels[lvlNum];
     state[next.id] = state[next.id] || {};
     state[next.id].current = true;
   }
 
-  // Hele les afgerond? Dan eerste level van volgende les als current
   if(lvlNum === lesson.levels.length && geslaagd){
     if(lesNum < LESSONS.length){
       const nextLesson = LESSONS[lesNum];
@@ -172,33 +195,49 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
 
   saveState();
   drawMap();
-
   document.getElementById('levelContainer').style.display='none';
   document.getElementById('mapContainer').style.display='block';
   document.getElementById('xpDisplay').style.display='block';
 
+    // --- Hier toevoegen: verzenden naar Google Sheet ---
+    const learnerName = localStorage.getItem('studentFirstName') + " " + localStorage.getItem('studentLastName');
+    const payload = {
+      learnerName: learnerName,
+      levelId: levelId,
+      xp: verdiendeXP,
+      result: geslaagd ? "Geslaagd" : "Niet geslaagd"
+    };
+    
+    fetch("https://script.google.com/a/macros/labsintniklaas.be/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" }
+      
+    })
+    .then(response => response.json())
+    .then(data => console.log("Sheet update:", data))
+    .catch(err => console.error("Fout bij Sheet update:", err));
+    
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
     messageBox.innerText = `⚠️ Je bent gefaald bij level ${levelId}. Probeer het opnieuw.`;
     messageBox.style.display='block';
     setTimeout(()=>{ messageBox.style.display='none'; }, 5000);
   } else if(lvlNum === lesson.levels.length && geslaagd){
-      if(lesNum < LESSONS.length){
-          messageBox.innerText = `🎉 Proficiat! Je hebt les ${lesNum} met succes afgerond! De volgende les is nu beschikbaar.`;
-      } else {
-          messageBox.innerText = `🏆 Fantastisch! Je hebt de volledige lessenreeks gemaakt.`;
-      }
-      messageBox.style.display = 'block';
-      setTimeout(()=>{ messageBox.style.display='none'; }, 5000);
+    if(lesNum < LESSONS.length){
+      messageBox.innerText = `🎉 Proficiat! Je hebt les ${lesNum} met succes afgerond! De volgende les is nu beschikbaar.`;
+    } else {
+      messageBox.innerText = `🏆 Fantastisch! Je hebt de volledige lessenreeks gemaakt.`;
+    }
+    messageBox.style.display = 'block';
+    setTimeout(()=>{ messageBox.style.display='none'; }, 5000);
   }
 };
 
 // --- Map tekenen ---
 const container = document.getElementById('mapContainer');
-
 function drawMap(){
   container.innerHTML='';
-
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS,"svg");
   svg.setAttribute("id","mapPath");
@@ -209,11 +248,7 @@ function drawMap(){
 
   let yOffset=30;
   const XS=200,R=25,stepY=4*R;
-
-  // Check of een failed level aanwezig is
   const hasFailed = Object.values(state).some(s=>s.failed);
-
-  // Klikbare level bepalen (current of eerste incomplete)
   let clickableLevelId = null;
   if(!hasFailed){
     outerLoop:
@@ -237,9 +272,7 @@ function drawMap(){
       }
     }
   }
-
   let failedLevelEl = null;
-
   LESSONS.forEach((lesson,lIdx)=>{
     if(lIdx>0){
       const divider=document.createElement('div');
@@ -247,22 +280,18 @@ function drawMap(){
       divider.style.top=(yOffset-20)+'px';
       container.appendChild(divider);
     }
-
     const title=document.createElement('div');
     title.className='lesson-title';
     title.innerText=LESSON_NAMES[lIdx];
     title.style.top=(lIdx===0?yOffset:yOffset+10)+'px';
     container.appendChild(title);
-
     const YS=yOffset+30;
     const startLabel=document.createElement('div');
     startLabel.className='route-label';
     startLabel.style.top=YS+'px';
     startLabel.innerText='START';
     container.appendChild(startLabel);
-
     let lastLevelY=0, prevX=XS, prevY=YS+45/2;
-
     lesson.levels.forEach((lvl,idx)=>{
       const div=document.createElement('div');
       div.className='level';
@@ -273,19 +302,13 @@ function drawMap(){
       div.style.top=(Ypos-R)+'px';
       const s=state[lvl.id]||{};
       if(s.completed) div.classList.add('completed');
-      else if(s.failed){
-        div.classList.add('failed');
-        failedLevelEl = div; // onthoud de gefaalde level
-      }
+      else if(s.failed){ div.classList.add('failed'); failedLevelEl = div; }
       else if(s.current) div.classList.add('current');
       else div.classList.add('locked');
-
       if(clickableLevelId && lvl.id===clickableLevelId){
         div.onclick=()=>{ openLevel(lvl.id,LESSON_NAMES[lIdx]); };
       }
-
       container.appendChild(div);
-
       const path=document.createElementNS(svgNS,"path");
       const startX=prevX,startY=prevY,endX=Xpos,endY=Ypos-R;
       const midX=(startX+endX)/2,midY=startY+(endY-startY)/2;
@@ -294,11 +317,8 @@ function drawMap(){
       path.setAttribute("stroke-width","4");
       path.setAttribute("fill","none");
       svg.appendChild(path);
-
-      prevX=Xpos;
-      prevY=Ypos+R;
+      prevX=Xpos; prevY=Ypos+R;
     });
-
     const finishX=XS, finishY=lastLevelY+stepY+45/2;
     const pathToFinish=document.createElementNS(svgNS,"path");
     const midX2=(prevX+finishX)/2, midY2=prevY+(finishY-prevY)/2;
@@ -307,13 +327,11 @@ function drawMap(){
     pathToFinish.setAttribute("stroke-width","4");
     pathToFinish.setAttribute("fill","none");
     svg.appendChild(pathToFinish);
-
     const finishLabel=document.createElement('div');
     finishLabel.className='route-label';
     finishLabel.innerText="FINISH";
     finishLabel.style.top=(lastLevelY+stepY)+'px';
     container.appendChild(finishLabel);
-
     yOffset=lastLevelY+stepY+80;
   });
 
@@ -321,7 +339,6 @@ function drawMap(){
     const totalHeight = container.scrollHeight;
     svg.setAttribute("height", totalHeight);
     svg.setAttribute("viewBox", `0 0 ${container.offsetWidth} ${totalHeight}`);
-
     let scrollEl = failedLevelEl || container.querySelector(`.level.current`);
     if(scrollEl){
       const rect = scrollEl.getBoundingClientRect();
@@ -361,9 +378,9 @@ document.getElementById('resetBtn').onclick=()=>{
 
 if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
 
-drawMap();
+// --- Start ---
+checkStudent();
+
 </script>
 </body>
 </html>
-
-
