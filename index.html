@@ -199,24 +199,14 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
   document.getElementById('mapContainer').style.display='block';
   document.getElementById('xpDisplay').style.display='block';
 
-    // --- Hier toevoegen: verzenden naar Google Sheet ---
-    const learnerName = localStorage.getItem('studentFirstName') + " " + localStorage.getItem('studentLastName');
-    const payload = {
-      learnerName: learnerName,
-      levelId: levelId,
-      xp: verdiendeXP,
-      result: geslaagd ? "Geslaagd" : "Niet geslaagd"
-    };
-    
-    fetch("https://script.google.com/macros/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
-      
-    })
-    .then(response => response.json())
-    .then(data => console.log("Sheet update:", data))
-    .catch(err => console.error("Fout bij Sheet update:", err));
+// --- Verzenden naar Google Sheet via formulier ---
+document.getElementById('formLearnerName').value = localStorage.getItem('studentFirstName') + " " + localStorage.getItem('studentLastName');
+document.getElementById('formLevelId').value = levelId;
+document.getElementById('formXP').value = verdiendeXP;
+document.getElementById('formResult').value = geslaagd ? "Geslaagd" : "Niet geslaagd";
+
+// submit het formulier
+document.getElementById('scoreForm').submit();
     
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
@@ -382,6 +372,16 @@ if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
 checkStudent();
 
 </script>
+
+  <form id="scoreForm" action="https://script.google.com/macros/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec" method="post" target="hidden_iframe">
+  <input type="hidden" name="learnerName" id="formLearnerName">
+  <input type="hidden" name="levelId" id="formLevelId">
+  <input type="hidden" name="xp" id="formXP">
+  <input type="hidden" name="result" id="formResult">
+</form>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 </body>
 </html>
+
 
