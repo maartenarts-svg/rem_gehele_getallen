@@ -208,7 +208,7 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
       result: geslaagd ? "Geslaagd" : "Niet geslaagd"
     };
     
-    fetch("https://script.google.com/a/macros/labsintniklaas.be/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyfOuKm_83Bd2dZgcA2FqrpDuENHFi0B9cM6ORXH2CHhsArT1V5iC0hruC6n1AlGU8n/exec", {
       method: "POST",
       body: JSON.stringify(payload),
       headers: { "Content-Type": "application/json" }
@@ -384,3 +384,4 @@ checkStudent();
 </script>
 </body>
 </html>
+
