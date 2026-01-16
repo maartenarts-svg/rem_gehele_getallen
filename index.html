@@ -116,52 +116,57 @@ document.getElementById('loginBtn').onclick = async function() {
 
   try {
     const snapshot = await get(leerlingRef);
-    if(snapshot.exists()){
-      const data = snapshot.val();
-      state = data.levels || {};
-      state.xp = data.xp || 0;
 
-      // --- Verwijder oude current flags, maar sla 'xp' over ---
-      Object.keys(state).forEach(k => { 
-        if(k !== "xp" && state[k]) state[k].current = false; 
-      });
+    // --- Controleer of leerling bestaat ---
+    if(!snapshot.exists()){
+      alert("Je bent niet geregistreerd. Neem contact op met je leerkracht.");
+      return;
+    }
 
-      // Bepaal automatisch current level
-      let firstFailed = null;
+    const data = snapshot.val();
+
+    // --- Controleer of account actief is ---
+    if(data.actief !== true){
+      alert("Je account is niet actief.");
+      return;
+    }
+    
+    // --- Vanaf hier mag de leerling starten ---
+    state = data.levels || {};
+    state.xp = data.xp || 0;
+    
+    // --- Verwijder oude current flags, maar sla 'xp' over ---
+    Object.keys(state).forEach(k => { 
+      if(k !== "xp" && state[k]) state[k].current = false; 
+    });
+
+    // Bepaal automatisch current level
+    let firstFailed = null;
+    outerLoop:
+    for(let lesson of LESSONS){
+      for(let lvl of lesson.levels){
+        if(state[lvl.id]?.failed){
+          firstFailed = lvl.id;
+          break outerLoop;
+        }
+      }
+    }
+    if(firstFailed) state[firstFailed].current = true;
+    else {
       outerLoop:
       for(let lesson of LESSONS){
         for(let lvl of lesson.levels){
-          if(state[lvl.id]?.failed){
-            firstFailed = lvl.id;
+          if(!state[lvl.id]?.completed){
+            state[lvl.id] = state[lvl.id] || {};
+            state[lvl.id].current = true;
             break outerLoop;
           }
         }
       }
-      if(firstFailed) state[firstFailed].current = true;
-      else {
-        outerLoop:
-        for(let lesson of LESSONS){
-          for(let lvl of lesson.levels){
-            if(!state[lvl.id]?.completed){
-              state[lvl.id] = state[lvl.id] || {};
-              state[lvl.id].current = true;
-              break outerLoop;
-            }
-          }
-        }
-      }
-
-      console.log(`🔹 Voortgang geladen voor ${naam}`);
-    } else {
-      state = {};
-      state.xp = 0;
-
-      // Eerste level van eerste les current maken
-      const firstLevelId = LESSONS[0].levels[0].id;
-      state[firstLevelId] = { current: true };
-
-      console.log(`🔹 Nieuwe leerling: ${naam}`);
     }
+
+    console.log(`🔹 Voortgang geladen voor ${naam}`);
+
 
     document.getElementById('loginContainer').style.display='none';
     document.getElementById('mapContainer').style.display='block';
@@ -454,5 +459,6 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
