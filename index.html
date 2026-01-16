@@ -99,7 +99,7 @@ async function saveToFirebase() {
     await set(leerlingRef, {
       ...bestaandeData,              // behoud naam, actief, etc.
       xp: state.xp,
-      levels: Object.fromEntries(Object.entries(state).filter(([k]) => k !== "xp")),
+      levels: Object.fromEntries(LESSONS.flatMap(l => l.levels.map(lvl => [lvl.id, state[lvl.id] || {}]))),
       laatstBijgewerkt: Date.now()
     });
     
@@ -241,7 +241,7 @@ function openLevel(levelId, lesName){
 }
 
 // --- Level afronden ---
-window.completeLevel = function(levelId, verdiendeXP, geslaagd){
+window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
   const [lesNumStr,lvlNumStr] = levelId.split('-');
   const lesNum = parseInt(lesNumStr,10);
   const lvlNum = parseInt(lvlNumStr,10);
@@ -270,7 +270,7 @@ window.completeLevel = function(levelId, verdiendeXP, geslaagd){
 
   saveState();
   drawMap();
-  saveToFirebase();
+  await saveToFirebase();
 
   document.getElementById('levelContainer').style.display='none';
   document.getElementById('mapContainer').style.display='block';
@@ -437,26 +437,31 @@ function drawMap(){
 }
 
 // --- Reset knop ---
-document.getElementById('resetBtn').onclick=()=>{
-  const code=prompt("Geef resetcode in:");
+document.getElementById('resetBtn').onclick = async ()=>{
+  if(!leerlingIdGlobal){ 
+    alert("Geen leerling ingelogd."); 
+    return; 
+  }
+
+  const code = prompt("Geef resetcode in:");
   if(code==='852874179639'){
-    const levelInput=prompt("Naar welke level wil je resetten? (bijv. 1.1, 2.2)");
+    const levelInput = prompt("Naar welke level wil je resetten? (bijv. 1.1, 2.2)");
     const [lesNrStr, lvlNrStr] = levelInput.split('.');
     const lesNr = parseInt(lesNrStr,10), lvlNr = parseInt(lvlNrStr,10);
     let valid = LESSONS[lesNr-1]?.levels[lvlNr-1] !== undefined;
     if(!valid){ alert("Deze level bestaat niet. Geef een ander level in."); return; }
 
-    state.xp=0;
+    state.xp = 0;
     LESSONS.forEach((lesson,lIdx)=>{
       lesson.levels.forEach((lvl,idx)=>{
-        if(lIdx+1 < lesNr || (lIdx+1 === lesNr && idx+1 < lvlNr)) state[lvl.id]={completed:true};
-        else if(lIdx+1 === lesNr && idx+1 === lvlNr) state[lvl.id]={current:true};
-        else state[lvl.id]={};
+        if(lIdx+1 < lesNr || (lIdx+1 === lesNr && idx+1 < lvlNr)) state[lvl.id] = {completed:true};
+        else if(lIdx+1 === lesNr && idx+1 === lvlNr) state[lvl.id] = {current:true};
+        else state[lvl.id] = {};
       });
     });
     saveState();
     drawMap();
-    saveToFirebase();
+    await saveToFirebase();   // <--- async
   } else alert("De code is fout. Er verandert niets.");
 };
 
@@ -466,6 +471,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
