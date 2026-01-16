@@ -96,7 +96,7 @@ function saveToFirebase() {
 
   set(ref(db, "leerlingen/" + leerlingIdGlobal), {
     xp: state.xp,
-    levels: levelsToSave,
+    levels: Object.fromEntries(Object.entries(state).filter(([k]) => k !== "xp")),
     laatstBijgewerkt: Date.now()
   }).then(()=>console.log("💾 Resultaten opgeslagen in Firebase"))
     .catch(err=>console.error("❌ Fout bij opslaan:", err));
@@ -121,8 +121,10 @@ document.getElementById('loginBtn').onclick = async function() {
       state = data.levels || {};
       state.xp = data.xp || 0;
 
-      // Verwijder oude current flags
-      Object.keys(state).forEach(k => { if(state[k]) state[k].current = false; });
+      // --- Verwijder oude current flags, maar sla 'xp' over ---
+      Object.keys(state).forEach(k => { 
+        if(k !== "xp" && state[k]) state[k].current = false; 
+      });
 
       // Bepaal automatisch current level
       let firstFailed = null;
@@ -448,3 +450,4 @@ drawMap();
 </script>
 </body>
 </html>
+
