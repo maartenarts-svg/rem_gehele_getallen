@@ -97,7 +97,7 @@ async function saveToFirebase() {
     
     // Alleen levels, xp en laatstBijgewerkt updaten, de rest blijft behouden
     await set(leerlingRef, {
-      ...bestaandeData,              // behoud naam, actief, etc.
+      ...bestaandeData,
       xp: state.xp,
       levels: Object.fromEntries(LESSONS.flatMap(l => l.levels.map(lvl => [lvl.id, state[lvl.id] || {}]))),
       laatstBijgewerkt: Date.now()
@@ -270,7 +270,6 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
       if(geslaagd) state[lvl.id].completed = true;
       else state[lvl.id].failed = true;
     }
-    // laat current voorlopig staan
   });
 
   // --- Verwijder alle huidige current flags ---
@@ -304,12 +303,15 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
   }
 
   saveState();
-  drawMap();
   await saveToFirebase();
-
+  
+  // Show map FIRST before drawing
   document.getElementById('levelContainer').style.display='none';
   document.getElementById('mapContainer').style.display='block';
   document.getElementById('xpDisplay').style.display='block';
+  
+  // Then draw the map
+  drawMap();
 
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
@@ -334,7 +336,6 @@ function drawMap(){
   const svg = document.createElementNS(svgNS,"svg");
   svg.setAttribute("id","mapPath");
   svg.setAttribute("width","100%");
-  svg.setAttribute("height","1");
   svg.setAttribute("viewBox",`0 0 ${container.offsetWidth} 1`);
   container.appendChild(svg);
 
@@ -384,6 +385,8 @@ function drawMap(){
   }
 
   let failedLevelEl = null;
+  let currentLevelEl = null;
+  let maxYPosition = 0;
 
   LESSONS.forEach((lesson,lIdx)=>{
     if(lIdx>0){
@@ -422,7 +425,10 @@ function drawMap(){
         div.classList.add('failed');
         failedLevelEl = div;
       }
-      else if(s.current) div.classList.add('current');
+      else if(s.current){
+        div.classList.add('current');
+        currentLevelEl = div;
+      }
       else div.classList.add('locked');
 
       if(clickableLevelId && lvl.id===clickableLevelId){
@@ -460,23 +466,24 @@ function drawMap(){
     container.appendChild(finishLabel);
 
     yOffset=lastLevelY+stepY+80;
+    maxYPosition = Math.max(maxYPosition, yOffset);
   });
 
-  // --- Scroll automatisch naar huidige level ---
-  requestAnimationFrame(()=>{
-    const totalHeight = container.scrollHeight;
-    svg.setAttribute("height", totalHeight);
-    svg.setAttribute("viewBox", `0 0 ${container.offsetWidth} ${totalHeight}`);
+  // Set SVG height IMMEDIATELY after calculating maxYPosition
+  svg.setAttribute("height", maxYPosition);
+  svg.setAttribute("viewBox", `0 0 ${container.offsetWidth} ${maxYPosition}`);
 
-    let scrollEl = container.querySelector(`.level.current`) || failedLevelEl;
+  updateXPDisplay();
+
+  // Scroll to current level AFTER everything is rendered
+  setTimeout(() => {
+    let scrollEl = currentLevelEl || failedLevelEl;
     if(scrollEl){
       const rect = scrollEl.getBoundingClientRect();
       const scrollTop = window.scrollY + rect.top - window.innerHeight/2 + rect.height/2;
       window.scrollTo({ top: scrollTop, behavior: "smooth" });
     }
-  });
-
-  updateXPDisplay();
+  }, 100);
 }
 
 // --- Reset knop ---
@@ -504,7 +511,7 @@ document.getElementById('resetBtn').onclick = async ()=>{
     });
     saveState();
     drawMap();
-    await saveToFirebase();   // <--- async
+    await saveToFirebase();
   } else alert("De code is fout. Er verandert niets.");
 };
 
@@ -514,15 +521,3 @@ drawMap();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
