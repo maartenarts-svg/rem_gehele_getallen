@@ -15,7 +15,9 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 .level.completed-retry { background: #4a90e2; border-color: #2e5f8a; color: white; }
 .level.current { background: #4CAF50; border-color: #2e7d32; }
 .level.failed { background: #f8c8d0; border-color: #f08090; }
-.level.skipped { background: white; border-color: #ccc; opacity: 0.5; }
+.level.skipped { background: #e0e0e0; border-color: #999; }
+.level.skipped::after { content: '❌'; font-size: 20px; }
+.level.locked { background: #e0e0e0; border-color: #999; }
 .level.locked::after { content: '🔒'; font-size: 20px; }
 .route-label { position: absolute; width: 120px; height: 45px; border-radius: 25px; background: #d8c7ff; display: flex; justify-content: center; align-items: center; font-weight: bold; left: 50%; transform: translateX(-50%); }
 .lesson-title { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 14px; left: 0; transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -40,8 +42,10 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 #adminPanel .level-box.blue::after { content: '🏅'; }
 #adminPanel .level-box.green { background: #4CAF50; border-color: #2e7d32; color: white; }
 #adminPanel .level-box.red { background: #f8c8d0; border-color: #f08090; }
-#adminPanel .level-box.skipped { background: white; border-color: #ccc; opacity: 0.5; }
+#adminPanel .level-box.skipped { background: #e0e0e0; border-color: #999; }
+#adminPanel .level-box.skipped::after { content: '❌'; }
 #adminPanel .level-box.gray { background: #e0e0e0; border-color: #999; }
+#adminPanel .level-box.gray::after { content: '🔒'; }
 #adminPanel .close-btn { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
 input { margin:5px; padding:5px; width:80px; }
 button { padding:5px 10px; margin-top:10px; }
