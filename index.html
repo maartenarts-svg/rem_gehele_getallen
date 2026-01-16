@@ -340,21 +340,24 @@ function drawMap(){
 
   let yOffset=30;
   const XS=200,R=25,stepY=4*R;
-  const hasFailed = Object.values(state).some(s=>s.failed);
+
+  // --- Bepaal clickableLevelId (huidige level) ---
   let clickableLevelId = null;
 
-  if(hasFailed){
-    outerLoop:
-    for(let lesson of LESSONS){
-      for(let lvl of lesson.levels){
-        if(state[lvl.id]?.failed){
-          clickableLevelId = lvl.id;
-          state[clickableLevelId].current = true;
-          break outerLoop;
-        }
+  // 1️⃣ Failed levels krijgen prioriteit
+  outerLoop:
+  for(let lesson of LESSONS){
+    for(let lvl of lesson.levels){
+      if(state[lvl.id]?.failed){
+        clickableLevelId = lvl.id;
+        state[clickableLevelId].current = true;
+        break outerLoop;
       }
     }
-  } else {
+  }
+
+  // 2️⃣ Huidige level
+  if(!clickableLevelId){
     outerLoop:
     for(let lesson of LESSONS){
       for(let lvl of lesson.levels){
@@ -364,13 +367,17 @@ function drawMap(){
         }
       }
     }
-    if(!clickableLevelId){
-      for(let lesson of LESSONS){
-        const incompleteLvl = lesson.levels.find(lvl => !state[lvl.id]?.completed && !state[lvl.id]?.failed);
-        if(incompleteLvl){
-          clickableLevelId = incompleteLvl.id;
+  }
+
+  // 3️⃣ Eerste incomplete level
+  if(!clickableLevelId){
+    outerLoop:
+    for(let lesson of LESSONS){
+      for(let lvl of lesson.levels){
+        if(!state[lvl.id]?.completed && !state[lvl.id]?.failed){
+          clickableLevelId = lvl.id;
           state[clickableLevelId].current = true;
-          break;
+          break outerLoop;
         }
       }
     }
@@ -455,23 +462,21 @@ function drawMap(){
     yOffset=lastLevelY+stepY+80;
   });
 
-  // --- Update XP display ---
-  updateXPDisplay();
-
-  // --- Zorg dat browser tijd krijgt om DOM te renderen voordat we scrollen ---
-  setTimeout(()=>{
+  // --- Scroll automatisch naar huidige level ---
+  requestAnimationFrame(()=>{
     const totalHeight = container.scrollHeight;
     svg.setAttribute("height", totalHeight);
     svg.setAttribute("viewBox", `0 0 ${container.offsetWidth} ${totalHeight}`);
 
-    // scroll naar current level
-    const scrollEl = container.querySelector(`.level.current`) || failedLevelEl;
+    let scrollEl = container.querySelector(`.level.current`) || failedLevelEl;
     if(scrollEl){
       const rect = scrollEl.getBoundingClientRect();
       const scrollTop = window.scrollY + rect.top - window.innerHeight/2 + rect.height/2;
       window.scrollTo({ top: scrollTop, behavior: "smooth" });
     }
-  }, 50); // 50ms geeft browser tijd om DOM volledig te renderen
+  });
+
+  updateXPDisplay();
 }
 
 // --- Reset knop ---
@@ -509,6 +514,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
