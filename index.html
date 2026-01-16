@@ -570,7 +570,7 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
 
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
-    messageBox.innerText = `⚠️ Je bent gefaald bij level ${levelId}. Probeer het opnieuw.`;
+    messageBox.innerText = `⚠️ Je hebt level ${levelId} niet gehaald. Probeer het opnieuw.`;
     messageBox.style.display='block';
     setTimeout(()=>{ messageBox.style.display='none'; },5000);
   } else if(lvlNum === lesson.levels.length && geslaagd){
@@ -789,3 +789,4 @@ if(Object.keys(state).length===0){ state[LESSONS[0].levels[0].id] = { current:tr
 </script>
 </body>
 </html>
+
