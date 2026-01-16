@@ -198,18 +198,18 @@ function showExercise(){
     nextBtn.style.display = 'none';
     fb.style.display = 'none';
 
-    let geslaagd = xp >= 12;
+    let geslaagd = xp >= 7;
     let message = "";
     if(geslaagd){
-        message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
-                     Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
-                   </div>`;
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
     } else {
         message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
-                     Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.
-                   </div>`;
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
     }
-
+    
     exerciseDiv.innerHTML = `
       <div style="background:white; padding:25px; border-radius:20px; 
                   box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
@@ -340,12 +340,7 @@ function showExercise(){
       children[selectedChoice].style.backgroundColor='lightgreen';
       fb.innerText='✅ Correct!';
       fb.style.display='block';
-      if(currentIndex < 5) {
-        xp += 1;
-      }
-      else {
-        xp += 2;
-      }
+      xp += 1;
     } else {
       children[selectedChoice].style.backgroundColor='#ffcccc'; 
       children[correctIndex].style.backgroundColor='lightgreen'; 
