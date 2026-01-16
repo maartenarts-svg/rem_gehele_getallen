@@ -264,39 +264,43 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
 
   // --- Behoud bestaande data en markeer levels correct ---
   lesson.levels.forEach((lvl, idx)=>{
-    state[lvl.id] = state[lvl.id] || {}; // behoud bestaande data
-
+    state[lvl.id] = state[lvl.id] || {}; 
     if(idx < lvlNum-1) state[lvl.id].completed = true;
     else if(idx === lvlNum-1){
       if(geslaagd) state[lvl.id].completed = true;
       else state[lvl.id].failed = true;
-      delete state[lvl.id].current; // afgerond level is niet current
-    } else {
-      delete state[lvl.id].current; // toekomstige levels niet current
     }
+    // laat current voorlopig staan
+  });
+
+  // --- Verwijder alle huidige current flags ---
+  Object.keys(state).forEach(k=>{
+    if(k !== 'xp') state[k].current = false;
   });
 
   // --- Zet volgende level als current ---
-  let nextLevelSet = false;
+  let nextSet = false;
 
+  // 1️⃣ volgende level in dezelfde les
   if(lvlNum < lesson.levels.length && geslaagd){
     const next = lesson.levels[lvlNum];
     state[next.id] = state[next.id] || {};
     state[next.id].current = true;
-    nextLevelSet = true;
+    nextSet = true;
   }
 
+  // 2️⃣ eerste level van volgende les
   if(lvlNum === lesson.levels.length && geslaagd && lesNum < LESSONS.length){
     const nextLesson = LESSONS[lesNum];
-    const firstNextLevel = nextLesson.levels[0];
-    state[firstNextLevel.id] = state[firstNextLevel.id] || {};
-    state[firstNextLevel.id].current = true;
-    nextLevelSet = true;
+    const firstNext = nextLesson.levels[0];
+    state[firstNext.id] = state[firstNext.id] || {};
+    state[firstNext.id].current = true;
+    nextSet = true;
   }
 
-  // Als er geen volgende level is (alles gedaan), zet huidig level als current
-  if(!nextLevelSet && !state[lesson.levels[lvlNum-1].id].failed){
-    state[lesson.levels[lvlNum-1].id].current = true;
+  // 3️⃣ als falen of laatste level, blijf current bij dit level
+  if(!nextSet){
+    state[levelId].current = true;
   }
 
   saveState();
@@ -510,6 +514,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
