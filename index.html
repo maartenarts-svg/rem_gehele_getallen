@@ -139,8 +139,8 @@ document.getElementById('loginBtn').onclick = async function() {
     }
     
     // --- Vanaf hier mag de leerling starten ---
-    state = data.levels || {};
-    state.xp = data.xp || 0;
+   state = data.levels ? {...data.levels} : {};
+   state.xp = data.xp || 0;
     
     // --- Verwijder oude current flags, maar sla 'xp' over ---
     Object.keys(state).forEach(k => { 
@@ -471,6 +471,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
