@@ -32,7 +32,7 @@ button { padding:5px 10px; margin-top:10px; }
 <div id="levelContainer"></div>
 <div id="messageBox"></div>
 
-<script>
+<script type="module">
 const LESSONS = [
   {id:"les1", levels:[{id:"1-1"},{id:"1-2"},{id:"1-3"},{id:"1-4"},{id:"1-5"}]},
   {id:"les2", levels:[{id:"2-1"},{id:"2-2"},{id:"2-3"},{id:"2-4"}]},
@@ -53,6 +53,45 @@ const LESSON_NAMES = [
 
 let state = JSON.parse(localStorage.getItem('mapState')) || {};
 state.xp = state.xp || 0;
+
+// --- Firebase setup ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDIxC6htGU-SNrgYMiXSmIyBm1wHX-ObWk",
+  authDomain: "remediering-map.firebaseapp.com",
+  databaseURL: "https://remediering-map-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "remediering-map",
+  storageBucket: "remediering-map.appspot.com",
+  messagingSenderId: "1070819853672",
+  appId: "1:1070819853672:web:b4cdefa00ae068826382dd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+console.log("🔥 Firebase verbonden");
+
+// 📌 Unieke leerling-ID
+let leerlingId = localStorage.getItem("leerlingId");
+if(!leerlingId){
+  leerlingId = "leerling_" + Math.random().toString(36).substring(2,8);
+  localStorage.setItem("leerlingId", leerlingId);
+}
+
+console.log("🔹 Leerling-ID:", leerlingId);
+
+// 📌 State opslaan in Firebase
+function saveToFirebase() {
+  set(ref(db, "leerlingen/" + leerlingId), {
+    xp: state.xp,
+    levels: state,
+    laatstBijgewerkt: Date.now()
+  })
+  .then(() => console.log("💾 Resultaten opgeslagen in Firebase"))
+  .catch(err => console.error("❌ Fout bij opslaan:", err));
+}
 
 function saveState(){ localStorage.setItem('mapState', JSON.stringify(state)); }
 function updateXPDisplay(){ document.getElementById('xpDisplay').innerText = `XP: ${state.xp}`; }
@@ -366,53 +405,10 @@ if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
 drawMap();
 </script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDIxC6htGU-SNrgYMiXSmIyBm1wHX-ObWk",
-  authDomain: "remediering-map.firebaseapp.com",
-  databaseURL: "https://remediering-map-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "remediering-map",
-  storageBucket: "remediering-map.firebasestorage.app",
-  messagingSenderId: "1070819853672",
-  appId: "1:1070819853672:web:b4cdefa00ae068826382dd"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-console.log("🔥 Firebase verbonden");
-
-// 📌 Unieke leerling-ID
-let leerlingId = localStorage.getItem("leerlingId");
-if(!leerlingId){
-  leerlingId = "leerling_" + Math.random().toString(36).substring(2,8);
-  localStorage.setItem("leerlingId", leerlingId);
-}
-
-console.log("🔹 Leerling-ID:", leerlingId);
-
-import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-// 📌 State opslaan in Firebase
-function saveToFirebase() {
-  set(ref(db, "leerlingen/" + leerlingId), {
-    xp: state.xp,
-    levels: state,
-    laatstBijgewerkt: Date.now()
-  })
-  .then(() => console.log("💾 Resultaten opgeslagen in Firebase"))
-  .catch(err => console.error("❌ Fout bij opslaan:", err));
-}
-
-
-</script>
-
 
 </body>
 </html>
+
 
 
 
