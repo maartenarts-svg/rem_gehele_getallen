@@ -155,7 +155,11 @@ document.getElementById('loginBtn').onclick = async function() {
     } else {
       state = {};
       state.xp = 0;
-      LESSONS[0].levels[0].current = true; // eerste level current
+
+      // Eerste level van eerste les current maken
+      const firstLevelId = LESSONS[0].levels[0].id;
+      state[firstLevelId] = { current: true };
+
       console.log(`🔹 Nieuwe leerling: ${naam}`);
     }
 
@@ -450,4 +454,5 @@ drawMap();
 </script>
 </body>
 </html>
+
 
