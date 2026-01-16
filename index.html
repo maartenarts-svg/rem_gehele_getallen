@@ -13,8 +13,9 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 .level.completed-first { background: gold; border-color: #f4a300; }
 .level.completed-retry::after { content: '🏅'; position: absolute; font-size: 18px; }
 .level.completed-retry { background: #4a90e2; border-color: #2e5f8a; color: white; }
-.level.current { background: gold; border-color: #f4a300; }
+.level.current { background: #4CAF50; border-color: #2e7d32; }
 .level.failed { background: #f8c8d0; border-color: #f08090; }
+.level.skipped { background: white; border-color: #ccc; opacity: 0.5; }
 .level.locked::after { content: '🔒'; font-size: 20px; }
 .route-label { position: absolute; width: 120px; height: 45px; border-radius: 25px; background: #d8c7ff; display: flex; justify-content: center; align-items: center; font-weight: bold; left: 50%; transform: translateX(-50%); }
 .lesson-title { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 14px; left: 0; transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -37,7 +38,9 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 #adminPanel .level-box.gold::after { content: '⭐'; }
 #adminPanel .level-box.blue { background: #4a90e2; border-color: #2e5f8a; color: white; }
 #adminPanel .level-box.blue::after { content: '🏅'; }
+#adminPanel .level-box.green { background: #4CAF50; border-color: #2e7d32; color: white; }
 #adminPanel .level-box.red { background: #f8c8d0; border-color: #f08090; }
+#adminPanel .level-box.skipped { background: white; border-color: #ccc; opacity: 0.5; }
 #adminPanel .level-box.gray { background: #e0e0e0; border-color: #999; }
 #adminPanel .close-btn { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
 input { margin:5px; padding:5px; width:80px; }
@@ -59,8 +62,16 @@ button { padding:5px 10px; margin-top:10px; }
 <div id="messageBox"></div>
 
 <div id="adminPanel">
-  <button class="close-btn" onclick="document.getElementById('adminPanel').style.display='none'">Sluiten</button>
+  <button class="close-btn" onclick="document.getElementById('adminPanel').style.display='none'; document.getElementById('studentSelect').value=''; document.getElementById('progressView').innerHTML='';">Sluiten</button>
   <h1>📊 Leerlingen Overzicht</h1>
+  
+  <div style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <h2>➕ Nieuwe Leerling Toevoegen</h2>
+    <input type="text" id="newStudentName" placeholder="Naam van leerling" style="width: 250px; padding: 8px; margin-right: 10px;">
+    <button id="addStudentBtn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Toevoegen</button>
+    <p style="margin-top: 10px; font-size: 14px; color: #666;">De leerling wordt automatisch toegevoegd met actief=true en alle levels leeg.</p>
+  </div>
+  
   <select id="studentSelect">
     <option value="">-- Selecteer een leerling --</option>
   </select>
@@ -303,6 +314,18 @@ document.getElementById('studentSelect').onchange = async function() {
     const studentData = snapshot.val();
     const levels = studentData.levels || {};
     
+    // Find current level
+    let currentLevelId = null;
+    outerLoop:
+    for(let lesson of LESSONS) {
+      for(let lvl of lesson.levels) {
+        if(levels[lvl.id]?.current) {
+          currentLevelId = lvl.id;
+          break outerLoop;
+        }
+      }
+    }
+    
     let html = `<h2>${studentData.naam}</h2>`;
     html += `<p><strong>XP:</strong> ${studentData.xp || 0}</p>`;
     
@@ -316,7 +339,15 @@ document.getElementById('studentSelect').onchange = async function() {
         const attempts = levelData.attempts || 0;
         
         let colorClass = 'gray';
-        if(levelData.completed) {
+        
+        // Check if this level is before current and has no attempts
+        const isBeforeCurrent = currentLevelId && isLevelBefore(lvl.id, currentLevelId);
+        
+        if(levelData.current) {
+          colorClass = 'green';
+        } else if(isBeforeCurrent && attempts === 0) {
+          colorClass = 'skipped';
+        } else if(levelData.completed) {
           colorClass = attempts === 1 ? 'gold' : 'blue';
         } else if(levelData.failed) {
           colorClass = 'red';
@@ -336,6 +367,93 @@ document.getElementById('studentSelect').onchange = async function() {
     console.error("Fout bij laden student:", err);
   }
 };
+
+// Helper function to check if level A is before level B
+function isLevelBefore(levelA, levelB) {
+  let indexA = -1, indexB = -1;
+  let currentIndex = 0;
+  
+  for(let lesson of LESSONS) {
+    for(let lvl of lesson.levels) {
+      if(lvl.id === levelA) indexA = currentIndex;
+      if(lvl.id === levelB) indexB = currentIndex;
+      currentIndex++;
+    }
+  }
+  
+  return indexA < indexB && indexA !== -1 && indexB !== -1;
+}
+
+// Add student functionality
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const addBtn = document.getElementById('addStudentBtn');
+    if(addBtn) {
+      addBtn.onclick = async function() {
+        const naam = document.getElementById('newStudentName').value.trim();
+        if(!naam) {
+          alert("Gelieve een naam in te vullen");
+          return;
+        }
+        
+        const leerlingId = createLeerlingId(naam);
+        const leerlingRef = ref(db, "leerlingen/" + leerlingId);
+        
+        try {
+          // Check if student already exists
+          const snapshot = await get(leerlingRef);
+          if(snapshot.exists()) {
+            alert("Deze leerling bestaat al!");
+            return;
+          }
+          
+          // Create new student with all levels initialized
+          const allLevels = {};
+          LESSONS.forEach(lesson => {
+            lesson.levels.forEach(lvl => {
+              allLevels[lvl.id] = { attempts: 0 };
+            });
+          });
+          
+          // Set first level as current
+          allLevels[LESSONS[0].levels[0].id].current = true;
+          
+          await set(leerlingRef, {
+            naam: naam,
+            actief: true,
+            xp: 0,
+            levels: allLevels,
+            laatstBijgewerkt: Date.now()
+          });
+          
+          alert(`Leerling "${naam}" succesvol toegevoegd!`);
+          document.getElementById('newStudentName').value = '';
+          
+          // Refresh student list
+          const leerlingenRef = ref(db, "leerlingen");
+          const allSnapshot = await get(leerlingenRef);
+          if(allSnapshot.exists()) {
+            const leerlingen = allSnapshot.val();
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- Selecteer een leerling --</option>';
+            
+            Object.keys(leerlingen).forEach(id => {
+              const leerling = leerlingen[id];
+              const option = document.createElement('option');
+              option.value = id;
+              option.textContent = leerling.naam || id;
+              select.appendChild(option);
+            });
+          }
+          
+        } catch(err) {
+          console.error("Fout bij toevoegen leerling:", err);
+          alert("Er ging iets mis bij het toevoegen van de leerling.");
+        }
+      };
+    }
+  }, 100);
+});
 
 // --- LEVELS object ---
 const LEVELS = {
@@ -552,7 +670,15 @@ function drawMap(){
       const s=state[lvl.id]||{ attempts: 0 };
       const attempts = s.attempts || 0;
       
-      if(s.completed) {
+      // Check if this level is before current and has no attempts
+      const isBeforeCurrent = clickableLevelId && isLevelBefore(lvl.id, clickableLevelId);
+      
+      if(s.current){
+        div.classList.add('current');
+        currentLevelEl = div;
+      } else if(isBeforeCurrent && attempts === 0) {
+        div.classList.add('skipped');
+      } else if(s.completed) {
         if(attempts === 1) {
           div.classList.add('completed-first');
         } else {
@@ -561,14 +687,11 @@ function drawMap(){
       } else if(s.failed){
         div.classList.add('failed');
         failedLevelEl = div;
-      } else if(s.current){
-        div.classList.add('current');
-        currentLevelEl = div;
       } else {
         div.classList.add('locked');
       }
       
-      if(attempts > 0 && !div.classList.contains('locked')) {
+      if(attempts > 0 && !div.classList.contains('locked') && !div.classList.contains('skipped')) {
         div.innerText = attempts;
       }
 
