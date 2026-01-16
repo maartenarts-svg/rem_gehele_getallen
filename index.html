@@ -131,6 +131,19 @@ document.getElementById('loginBtn').onclick = async function() {
     }
 
     const data = snapshot.val();
+    // --- Automatisch levels aanmaken voor nieuwe leerling als ze nog niet bestaan ---
+    if(!data.levels){
+      data.levels = Object.fromEntries(
+        LESSONS.flatMap(l => l.levels.map(lvl => [lvl.id, {}]))
+      );
+      
+      await set(leerlingRef, {
+        ...data,
+        levels: data.levels,
+        xp: 0,
+        laatstBijgewerkt: Date.now()
+      });
+    }
 
     // --- Controleer of account actief is ---
     if(data.actief !== true){
@@ -471,6 +484,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
