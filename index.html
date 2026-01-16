@@ -16,6 +16,7 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0
 .route-label { position: absolute; width: 120px; height: 45px; border-radius: 25px; background: #d8c7ff; display: flex; justify-content: center; align-items: center; font-weight: bold; left: 50%; transform: translateX(-50%); }
 .lesson-title { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 14px; left: 0; transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #resetBtn { position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; border-radius: 10px; cursor: pointer; }
+#logoutBtn { position: fixed; top: 60px; right: 20px; padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 10px; cursor: pointer; }
 #xpDisplay { position: fixed; top: 20px; left: 20px; padding: 8px 12px; background: #ffd700; color: black; font-weight: bold; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1000; }
 #mapPath { position: absolute; top: 0; left: 0; z-index: 0; }
 #levelContainer { position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:2000; display:none; padding:30px; overflow:auto; }
@@ -32,6 +33,7 @@ button { padding:5px 10px; margin-top:10px; }
 </div>
 <div id="xpDisplay">XP: 0</div>
 <button id="resetBtn">Reset</button>
+<button id="logoutBtn">Uitloggen</button>
 <div id="mapContainer"></div>
 <div id="levelContainer"></div>
 <div id="messageBox"></div>
@@ -41,6 +43,7 @@ button { padding:5px 10px; margin-top:10px; }
 document.getElementById('mapContainer').style.display = 'none';
 document.getElementById('xpDisplay').style.display = 'none';
 document.getElementById('resetBtn').style.display = 'none';
+document.getElementById('logoutBtn').style.display = 'none';
 
 const LESSONS = [
   {id:"les1", levels:[{id:"1-1"},{id:"1-2"},{id:"1-3"},{id:"1-4"},{id:"1-5"}]},
@@ -86,6 +89,19 @@ console.log("🔥 Firebase verbonden");
 function createLeerlingId(naam){ return "leerling_" + naam.toLowerCase().replace(/\s/g,"_"); }
 let leerlingIdGlobal; 
 
+// Functie om alle levels te synchroniseren met LESSONS array
+function syncLevelsWithDefinition(existingLevels) {
+  const allLevelIds = LESSONS.flatMap(l => l.levels.map(lvl => lvl.id));
+  const synced = {};
+  
+  // Voeg alle levels toe die in LESSONS staan
+  allLevelIds.forEach(id => {
+    synced[id] = existingLevels[id] || {};
+  });
+  
+  return synced;
+}
+
 async function saveToFirebase() {
   if(!leerlingIdGlobal) return;
   
@@ -95,11 +111,13 @@ async function saveToFirebase() {
     const snapshot = await get(leerlingRef);
     const bestaandeData = snapshot.exists() ? snapshot.val() : {};
     
-    // Alleen levels, xp en laatstBijgewerkt updaten, de rest blijft behouden
+    // Synchroniseer levels met huidige LESSONS definitie
+    const syncedLevels = syncLevelsWithDefinition(state);
+    
     await set(leerlingRef, {
       ...bestaandeData,
       xp: state.xp,
-      levels: Object.fromEntries(LESSONS.flatMap(l => l.levels.map(lvl => [lvl.id, state[lvl.id] || {}]))),
+      levels: syncedLevels,
       laatstBijgewerkt: Date.now()
     });
     
@@ -112,11 +130,8 @@ async function saveToFirebase() {
 function saveState(){ localStorage.setItem('mapState', JSON.stringify(state)); }
 function updateXPDisplay(){ document.getElementById('xpDisplay').innerText = `XP: ${state.xp}`; }
 
-// --- Login knop ---
-document.getElementById('loginBtn').onclick = async function() {
-  const naam = document.getElementById('loginName').value.trim();
-  if(!naam){ alert("Gelieve een naam in te vullen"); return; }
-
+// Functie om leerling in te laden
+async function loadLeerling(naam) {
   const leerlingId = createLeerlingId(naam);
   leerlingIdGlobal = leerlingId;
   const leerlingRef = ref(db, "leerlingen/" + leerlingId);
@@ -124,38 +139,24 @@ document.getElementById('loginBtn').onclick = async function() {
   try {
     const snapshot = await get(leerlingRef);
 
-    // --- Controleer of leerling bestaat ---
     if(!snapshot.exists()){
       alert("Je bent niet geregistreerd. Neem contact op met je leerkracht.");
-      return;
+      return false;
     }
 
     const data = snapshot.val();
-    // --- Automatisch levels aanmaken voor nieuwe leerling als ze nog niet bestaan ---
-    if(!data.levels){
-      data.levels = Object.fromEntries(
-        LESSONS.flatMap(l => l.levels.map(lvl => [lvl.id, {}]))
-      );
-      
-      await set(leerlingRef, {
-        ...data,
-        levels: data.levels,
-        xp: 0,
-        laatstBijgewerkt: Date.now()
-      });
-    }
-
-    // --- Controleer of account actief is ---
+    
     if(data.actief !== true){
       alert("Je account is niet actief.");
-      return;
+      return false;
     }
     
-    // --- Vanaf hier mag de leerling starten ---
-   state = data.levels ? {...data.levels} : {};
-   state.xp = data.xp || 0;
+    // Laad bestaande levels en synchroniseer met huidige LESSONS definitie
+    const existingLevels = data.levels || {};
+    state = syncLevelsWithDefinition(existingLevels);
+    state.xp = data.xp || 0;
     
-    // --- Verwijder oude current flags, maar sla 'xp' over ---
+    // Verwijder oude current flags
     Object.keys(state).forEach(k => { 
       if(k !== "xp" && state[k]) state[k].current = false; 
     });
@@ -186,20 +187,49 @@ document.getElementById('loginBtn').onclick = async function() {
     }
 
     console.log(`🔹 Voortgang geladen voor ${naam}`);
-
+    
+    // Sla naam op in localStorage voor automatisch inloggen
+    localStorage.setItem('loggedInUser', naam);
 
     document.getElementById('loginContainer').style.display='none';
     document.getElementById('mapContainer').style.display='block';
     document.getElementById('xpDisplay').style.display='block';
     document.getElementById('resetBtn').style.display='block';
+    document.getElementById('logoutBtn').style.display='block';
 
     drawMap();
-    saveToFirebase();
+    await saveToFirebase();
+    
+    return true;
   } catch(err){
     console.error("❌ Fout bij ophalen van Firebase:", err);
     alert("Er is iets misgelopen bij het laden van je voortgang.");
+    return false;
   }
+}
+
+// --- Login knop ---
+document.getElementById('loginBtn').onclick = async function() {
+  const naam = document.getElementById('loginName').value.trim();
+  if(!naam){ alert("Gelieve een naam in te vullen"); return; }
+  await loadLeerling(naam);
 };
+
+// --- Logout knop ---
+document.getElementById('logoutBtn').onclick = function() {
+  localStorage.removeItem('loggedInUser');
+  localStorage.removeItem('mapState');
+  location.reload();
+};
+
+// --- Automatisch inloggen bij pagina laden ---
+window.addEventListener('DOMContentLoaded', async () => {
+  const savedUser = localStorage.getItem('loggedInUser');
+  if(savedUser) {
+    console.log(`🔄 Automatisch inloggen als ${savedUser}`);
+    await loadLeerling(savedUser);
+  }
+});
 
 // --- LEVELS object ---
 const LEVELS = {
@@ -219,7 +249,6 @@ const LEVELS = {
     lc.style.display='block';
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-2", verdiendeXP, geslaagd); };
   }
-  // Voeg hier nieuwe echte levels toe
 };
 
 // --- Level openen ---
@@ -262,7 +291,7 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
 
   if(geslaagd) state.xp += verdiendeXP;
 
-  // --- Behoud bestaande data en markeer levels correct ---
+  // Behoud bestaande data en markeer levels correct
   lesson.levels.forEach((lvl, idx)=>{
     state[lvl.id] = state[lvl.id] || {}; 
     if(idx < lvlNum-1) state[lvl.id].completed = true;
@@ -272,12 +301,12 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
     }
   });
 
-  // --- Verwijder alle huidige current flags ---
+  // Verwijder alle huidige current flags
   Object.keys(state).forEach(k=>{
     if(k !== 'xp') state[k].current = false;
   });
 
-  // --- Zet volgende level als current ---
+  // Zet volgende level als current
   let nextSet = false;
 
   // 1️⃣ volgende level in dezelfde les
@@ -305,17 +334,15 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
   saveState();
   await saveToFirebase();
   
-  // Show map FIRST before drawing
   document.getElementById('levelContainer').style.display='none';
   document.getElementById('mapContainer').style.display='block';
   document.getElementById('xpDisplay').style.display='block';
   
-  // Then draw the map
   drawMap();
 
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
-    messageBox.innerText = `⚠️ Je hebt level ${levelId} niet gehaald. Probeer het opnieuw.`;
+    messageBox.innerText = `⚠️ Je bent gefaald bij level ${levelId}. Probeer het opnieuw.`;
     messageBox.style.display='block';
     setTimeout(()=>{ messageBox.style.display='none'; },5000);
   } else if(lvlNum === lesson.levels.length && geslaagd){
@@ -342,7 +369,7 @@ function drawMap(){
   let yOffset=30;
   const XS=200,R=25,stepY=4*R;
 
-  // --- Bepaal clickableLevelId (huidige level) ---
+  // Bepaal clickableLevelId (huidige level)
   let clickableLevelId = null;
 
   // 1️⃣ Failed levels krijgen prioriteit
@@ -469,13 +496,11 @@ function drawMap(){
     maxYPosition = Math.max(maxYPosition, yOffset);
   });
 
-  // Set SVG height IMMEDIATELY after calculating maxYPosition
   svg.setAttribute("height", maxYPosition);
   svg.setAttribute("viewBox", `0 0 ${container.offsetWidth} ${maxYPosition}`);
 
   updateXPDisplay();
 
-  // Scroll to current level AFTER everything is rendered
   setTimeout(() => {
     let scrollEl = currentLevelEl || failedLevelEl;
     if(scrollEl){
@@ -516,9 +541,7 @@ document.getElementById('resetBtn').onclick = async ()=>{
 };
 
 if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
-drawMap();
 
 </script>
 </body>
 </html>
-
