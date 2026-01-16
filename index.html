@@ -254,12 +254,25 @@ function drawMap(){
   // Check of een failed level aanwezig is
   const hasFailed = Object.values(state).some(s=>s.failed);
 
-  // Klikbare level bepalen (current of eerste incomplete)
+  // Klikbare level bepalen
   let clickableLevelId = null;
-  if(!hasFailed){
+
+  if(hasFailed){
+    // Maak de eerste failed level klikbaar
     outerLoop:
-    for(let l=0;l<LESSONS.length;l++){
-      const lesson = LESSONS[l];
+    for(let lesson of LESSONS){
+      for(let lvl of lesson.levels){
+        if(state[lvl.id]?.failed){
+          clickableLevelId = lvl.id;
+          state[clickableLevelId].current = true; // markeer als current
+          break outerLoop;
+        }
+      }
+    }
+  } else {
+    // Huidige logica voor normale levels
+    outerLoop:
+    for(let lesson of LESSONS){
       for(let lvl of lesson.levels){
         if(state[lvl.id]?.current){
           clickableLevelId = lvl.id;
@@ -408,6 +421,7 @@ drawMap();
 
 </body>
 </html>
+
 
 
 
