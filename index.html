@@ -7,20 +7,39 @@
 body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f4f8; display: flex; justify-content: center; }
 #mapContainer { position: relative; width: 400px; min-height: 3000px; margin: 0 auto; }
 .lesson-divider { position: absolute; height: 4px; background: #999; width: 100%; }
-.level { position: absolute; width: 50px; height: 50px; border-radius: 50%; border: 3px solid #ccc; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.level { position: absolute; width: 50px; height: 50px; border-radius: 50%; border: 3px solid #ccc; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; font-size: 12px; font-weight: bold; }
 .level:hover { transform: scale(1.1); }
-.level.completed::after { content: '⭐'; position: absolute; font-size: 18px; }
+.level.completed-first::after { content: '⭐'; position: absolute; font-size: 18px; }
+.level.completed-first { background: gold; border-color: #f4a300; }
+.level.completed-retry::after { content: '🏅'; position: absolute; font-size: 18px; }
+.level.completed-retry { background: #4a90e2; border-color: #2e5f8a; color: white; }
 .level.current { background: gold; border-color: #f4a300; }
 .level.failed { background: #f8c8d0; border-color: #f08090; }
 .level.locked::after { content: '🔒'; font-size: 20px; }
 .route-label { position: absolute; width: 120px; height: 45px; border-radius: 25px; background: #d8c7ff; display: flex; justify-content: center; align-items: center; font-weight: bold; left: 50%; transform: translateX(-50%); }
 .lesson-title { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 14px; left: 0; transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#resetBtn { position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; border-radius: 10px; cursor: pointer; }
-#logoutBtn { position: fixed; top: 60px; right: 20px; padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 10px; cursor: pointer; }
+#resetBtn { position: fixed; top: 20px; right: 20px; padding: 10px 15px; background: #007BFF; color: white; border: none; border-radius: 10px; cursor: pointer; z-index: 1001; }
+#logoutBtn { position: fixed; top: 60px; right: 20px; padding: 10px 15px; background: #dc3545; color: white; border: none; border-radius: 10px; cursor: pointer; z-index: 1001; }
+#adminBtn { position: fixed; top: 100px; right: 20px; padding: 10px 15px; background: #6c757d; color: white; border: none; border-radius: 10px; cursor: pointer; z-index: 1001; }
 #xpDisplay { position: fixed; top: 20px; left: 20px; padding: 8px 12px; background: #ffd700; color: black; font-weight: bold; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1000; }
 #mapPath { position: absolute; top: 0; left: 0; z-index: 0; }
 #levelContainer { position: fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:2000; display:none; padding:30px; overflow:auto; }
 #messageBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #d4edda; color: #155724; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: none; z-index: 1500; }
+#adminPanel { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; padding: 30px; overflow: auto; }
+#adminPanel h1 { margin-bottom: 20px; }
+#adminPanel select { padding: 8px; font-size: 16px; margin-bottom: 20px; width: 300px; }
+#adminPanel .lesson-section { margin-bottom: 30px; }
+#adminPanel .lesson-section h3 { margin-bottom: 10px; }
+#adminPanel .progress-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+#adminPanel .level-box { width: 60px; height: 60px; border: 2px solid #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; text-align: center; padding: 5px; box-sizing: border-box; position: relative; }
+#adminPanel .level-box::after { position: absolute; top: 2px; right: 2px; font-size: 14px; }
+#adminPanel .level-box.gold { background: gold; border-color: #f4a300; }
+#adminPanel .level-box.gold::after { content: '⭐'; }
+#adminPanel .level-box.blue { background: #4a90e2; border-color: #2e5f8a; color: white; }
+#adminPanel .level-box.blue::after { content: '🏅'; }
+#adminPanel .level-box.red { background: #f8c8d0; border-color: #f08090; }
+#adminPanel .level-box.gray { background: #e0e0e0; border-color: #999; }
+#adminPanel .close-btn { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
 input { margin:5px; padding:5px; width:80px; }
 button { padding:5px 10px; margin-top:10px; }
 </style>
@@ -34,9 +53,19 @@ button { padding:5px 10px; margin-top:10px; }
 <div id="xpDisplay">XP: 0</div>
 <button id="resetBtn">Reset</button>
 <button id="logoutBtn">Uitloggen</button>
+<button id="adminBtn">Admin 👁️</button>
 <div id="mapContainer"></div>
 <div id="levelContainer"></div>
 <div id="messageBox"></div>
+
+<div id="adminPanel">
+  <button class="close-btn" onclick="document.getElementById('adminPanel').style.display='none'">Sluiten</button>
+  <h1>📊 Leerlingen Overzicht</h1>
+  <select id="studentSelect">
+    <option value="">-- Selecteer een leerling --</option>
+  </select>
+  <div id="progressView"></div>
+</div>
 
 <script type="module">
 
@@ -44,6 +73,7 @@ document.getElementById('mapContainer').style.display = 'none';
 document.getElementById('xpDisplay').style.display = 'none';
 document.getElementById('resetBtn').style.display = 'none';
 document.getElementById('logoutBtn').style.display = 'none';
+document.getElementById('adminBtn').style.display = 'none';
 
 const LESSONS = [
   {id:"les1", levels:[{id:"1-1"},{id:"1-2"},{id:"1-3"},{id:"1-4"},{id:"1-5"}]},
@@ -89,14 +119,12 @@ console.log("🔥 Firebase verbonden");
 function createLeerlingId(naam){ return "leerling_" + naam.toLowerCase().replace(/\s/g,"_"); }
 let leerlingIdGlobal; 
 
-// Functie om alle levels te synchroniseren met LESSONS array
 function syncLevelsWithDefinition(existingLevels) {
   const allLevelIds = LESSONS.flatMap(l => l.levels.map(lvl => lvl.id));
   const synced = {};
   
-  // Voeg alle levels toe die in LESSONS staan
   allLevelIds.forEach(id => {
-    synced[id] = existingLevels[id] || {};
+    synced[id] = existingLevels[id] || { attempts: 0 };
   });
   
   return synced;
@@ -111,7 +139,6 @@ async function saveToFirebase() {
     const snapshot = await get(leerlingRef);
     const bestaandeData = snapshot.exists() ? snapshot.val() : {};
     
-    // Synchroniseer levels met huidige LESSONS definitie
     const syncedLevels = syncLevelsWithDefinition(state);
     
     await set(leerlingRef, {
@@ -130,7 +157,6 @@ async function saveToFirebase() {
 function saveState(){ localStorage.setItem('mapState', JSON.stringify(state)); }
 function updateXPDisplay(){ document.getElementById('xpDisplay').innerText = `XP: ${state.xp}`; }
 
-// Functie om leerling in te laden
 async function loadLeerling(naam) {
   const leerlingId = createLeerlingId(naam);
   leerlingIdGlobal = leerlingId;
@@ -151,17 +177,14 @@ async function loadLeerling(naam) {
       return false;
     }
     
-    // Laad bestaande levels en synchroniseer met huidige LESSONS definitie
     const existingLevels = data.levels || {};
     state = syncLevelsWithDefinition(existingLevels);
     state.xp = data.xp || 0;
     
-    // Verwijder oude current flags
     Object.keys(state).forEach(k => { 
       if(k !== "xp" && state[k]) state[k].current = false; 
     });
 
-    // Bepaal automatisch current level
     let firstFailed = null;
     outerLoop:
     for(let lesson of LESSONS){
@@ -178,7 +201,7 @@ async function loadLeerling(naam) {
       for(let lesson of LESSONS){
         for(let lvl of lesson.levels){
           if(!state[lvl.id]?.completed){
-            state[lvl.id] = state[lvl.id] || {};
+            state[lvl.id] = state[lvl.id] || { attempts: 0 };
             state[lvl.id].current = true;
             break outerLoop;
           }
@@ -188,7 +211,6 @@ async function loadLeerling(naam) {
 
     console.log(`🔹 Voortgang geladen voor ${naam}`);
     
-    // Sla naam op in localStorage voor automatisch inloggen
     localStorage.setItem('loggedInUser', naam);
 
     document.getElementById('loginContainer').style.display='none';
@@ -196,6 +218,7 @@ async function loadLeerling(naam) {
     document.getElementById('xpDisplay').style.display='block';
     document.getElementById('resetBtn').style.display='block';
     document.getElementById('logoutBtn').style.display='block';
+    document.getElementById('adminBtn').style.display='block';
 
     drawMap();
     await saveToFirebase();
@@ -208,21 +231,18 @@ async function loadLeerling(naam) {
   }
 }
 
-// --- Login knop ---
 document.getElementById('loginBtn').onclick = async function() {
   const naam = document.getElementById('loginName').value.trim();
   if(!naam){ alert("Gelieve een naam in te vullen"); return; }
   await loadLeerling(naam);
 };
 
-// --- Logout knop ---
 document.getElementById('logoutBtn').onclick = function() {
   localStorage.removeItem('loggedInUser');
   localStorage.removeItem('mapState');
   location.reload();
 };
 
-// --- Automatisch inloggen bij pagina laden ---
 window.addEventListener('DOMContentLoaded', async () => {
   const savedUser = localStorage.getItem('loggedInUser');
   if(savedUser) {
@@ -230,6 +250,92 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadLeerling(savedUser);
   }
 });
+
+// --- Admin Panel ---
+document.getElementById('adminBtn').onclick = async function() {
+  const code = prompt("Admin code:");
+  if(code !== '852874179639') {
+    alert("Verkeerde code");
+    return;
+  }
+  
+  // Laad alle leerlingen
+  const leerlingenRef = ref(db, "leerlingen");
+  try {
+    const snapshot = await get(leerlingenRef);
+    if(!snapshot.exists()) {
+      alert("Geen leerlingen gevonden");
+      return;
+    }
+    
+    const leerlingen = snapshot.val();
+    const select = document.getElementById('studentSelect');
+    select.innerHTML = '<option value="">-- Selecteer een leerling --</option>';
+    
+    Object.keys(leerlingen).forEach(id => {
+      const leerling = leerlingen[id];
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = leerling.naam || id;
+      select.appendChild(option);
+    });
+    
+    document.getElementById('adminPanel').style.display = 'block';
+    
+  } catch(err) {
+    console.error("Fout bij laden leerlingen:", err);
+    alert("Fout bij laden van leerlingen");
+  }
+};
+
+document.getElementById('studentSelect').onchange = async function() {
+  const studentId = this.value;
+  if(!studentId) {
+    document.getElementById('progressView').innerHTML = '';
+    return;
+  }
+  
+  const studentRef = ref(db, "leerlingen/" + studentId);
+  try {
+    const snapshot = await get(studentRef);
+    if(!snapshot.exists()) return;
+    
+    const studentData = snapshot.val();
+    const levels = studentData.levels || {};
+    
+    let html = `<h2>${studentData.naam}</h2>`;
+    html += `<p><strong>XP:</strong> ${studentData.xp || 0}</p>`;
+    
+    LESSONS.forEach((lesson, lIdx) => {
+      html += `<div class="lesson-section">`;
+      html += `<h3>${LESSON_NAMES[lIdx]}</h3>`;
+      html += `<div class="progress-bar">`;
+      
+      lesson.levels.forEach(lvl => {
+        const levelData = levels[lvl.id] || { attempts: 0 };
+        const attempts = levelData.attempts || 0;
+        
+        let colorClass = 'gray';
+        if(levelData.completed) {
+          colorClass = attempts === 1 ? 'gold' : 'blue';
+        } else if(levelData.failed) {
+          colorClass = 'red';
+        }
+        
+        html += `<div class="level-box ${colorClass}">`;
+        html += `${lvl.id}<br>${attempts}×`;
+        html += `</div>`;
+      });
+      
+      html += `</div></div>`;
+    });
+    
+    document.getElementById('progressView').innerHTML = html;
+    
+  } catch(err) {
+    console.error("Fout bij laden student:", err);
+  }
+};
 
 // --- LEVELS object ---
 const LEVELS = {
@@ -251,7 +357,6 @@ const LEVELS = {
   }
 };
 
-// --- Level openen ---
 function openLevel(levelId, lesName){
   if(LEVELS[levelId]) LEVELS[levelId]();
   else {
@@ -282,51 +387,52 @@ function openLevel(levelId, lesName){
   }
 }
 
-// --- Level afronden ---
 window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
   const [lesNumStr,lvlNumStr] = levelId.split('-');
   const lesNum = parseInt(lesNumStr,10);
   const lvlNum = parseInt(lvlNumStr,10);
   const lesson = LESSONS[lesNum-1];
 
+  // Verhoog attempts
+  state[levelId] = state[levelId] || { attempts: 0 };
+  state[levelId].attempts = (state[levelId].attempts || 0) + 1;
+
   if(geslaagd) state.xp += verdiendeXP;
 
-  // Behoud bestaande data en markeer levels correct
   lesson.levels.forEach((lvl, idx)=>{
-    state[lvl.id] = state[lvl.id] || {}; 
+    state[lvl.id] = state[lvl.id] || { attempts: 0 }; 
     if(idx < lvlNum-1) state[lvl.id].completed = true;
     else if(idx === lvlNum-1){
-      if(geslaagd) state[lvl.id].completed = true;
-      else state[lvl.id].failed = true;
+      if(geslaagd) {
+        state[lvl.id].completed = true;
+        state[lvl.id].failed = false;
+      } else {
+        state[lvl.id].failed = true;
+      }
     }
   });
 
-  // Verwijder alle huidige current flags
   Object.keys(state).forEach(k=>{
-    if(k !== 'xp') state[k].current = false;
+    if(k !== 'xp' && state[k] && typeof state[k] === 'object') state[k].current = false;
   });
 
-  // Zet volgende level als current
   let nextSet = false;
 
-  // 1️⃣ volgende level in dezelfde les
   if(lvlNum < lesson.levels.length && geslaagd){
     const next = lesson.levels[lvlNum];
-    state[next.id] = state[next.id] || {};
+    state[next.id] = state[next.id] || { attempts: 0 };
     state[next.id].current = true;
     nextSet = true;
   }
 
-  // 2️⃣ eerste level van volgende les
   if(lvlNum === lesson.levels.length && geslaagd && lesNum < LESSONS.length){
     const nextLesson = LESSONS[lesNum];
     const firstNext = nextLesson.levels[0];
-    state[firstNext.id] = state[firstNext.id] || {};
+    state[firstNext.id] = state[firstNext.id] || { attempts: 0 };
     state[firstNext.id].current = true;
     nextSet = true;
   }
 
-  // 3️⃣ als falen of laatste level, blijf current bij dit level
   if(!nextSet){
     state[levelId].current = true;
   }
@@ -354,7 +460,6 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
   }
 };
 
-// --- Map tekenen ---
 const container = document.getElementById('mapContainer');
 function drawMap(){
   container.innerHTML='';
@@ -369,10 +474,8 @@ function drawMap(){
   let yOffset=30;
   const XS=200,R=25,stepY=4*R;
 
-  // Bepaal clickableLevelId (huidige level)
   let clickableLevelId = null;
 
-  // 1️⃣ Failed levels krijgen prioriteit
   outerLoop:
   for(let lesson of LESSONS){
     for(let lvl of lesson.levels){
@@ -384,7 +487,6 @@ function drawMap(){
     }
   }
 
-  // 2️⃣ Huidige level
   if(!clickableLevelId){
     outerLoop:
     for(let lesson of LESSONS){
@@ -397,13 +499,13 @@ function drawMap(){
     }
   }
 
-  // 3️⃣ Eerste incomplete level
   if(!clickableLevelId){
     outerLoop:
     for(let lesson of LESSONS){
       for(let lvl of lesson.levels){
         if(!state[lvl.id]?.completed && !state[lvl.id]?.failed){
           clickableLevelId = lvl.id;
+          state[clickableLevelId] = state[clickableLevelId] || { attempts: 0 };
           state[clickableLevelId].current = true;
           break outerLoop;
         }
@@ -446,17 +548,29 @@ function drawMap(){
       lastLevelY=Ypos;
       div.style.left=(Xpos-R)+'px';
       div.style.top=(Ypos-R)+'px';
-      const s=state[lvl.id]||{};
-      if(s.completed) div.classList.add('completed');
-      else if(s.failed){
+      
+      const s=state[lvl.id]||{ attempts: 0 };
+      const attempts = s.attempts || 0;
+      
+      if(s.completed) {
+        if(attempts === 1) {
+          div.classList.add('completed-first');
+        } else {
+          div.classList.add('completed-retry');
+        }
+      } else if(s.failed){
         div.classList.add('failed');
         failedLevelEl = div;
-      }
-      else if(s.current){
+      } else if(s.current){
         div.classList.add('current');
         currentLevelEl = div;
+      } else {
+        div.classList.add('locked');
       }
-      else div.classList.add('locked');
+      
+      if(attempts > 0 && !div.classList.contains('locked')) {
+        div.innerText = attempts;
+      }
 
       if(clickableLevelId && lvl.id===clickableLevelId){
         div.onclick=()=>{ openLevel(lvl.id,LESSON_NAMES[lIdx]); };
@@ -511,7 +625,6 @@ function drawMap(){
   }, 100);
 }
 
-// --- Reset knop ---
 document.getElementById('resetBtn').onclick = async ()=>{
   if(!leerlingIdGlobal){ 
     alert("Geen leerling ingelogd."); 
@@ -529,9 +642,13 @@ document.getElementById('resetBtn').onclick = async ()=>{
     state.xp = 0;
     LESSONS.forEach((lesson,lIdx)=>{
       lesson.levels.forEach((lvl,idx)=>{
-        if(lIdx+1 < lesNr || (lIdx+1 === lesNr && idx+1 < lvlNr)) state[lvl.id] = {completed:true};
-        else if(lIdx+1 === lesNr && idx+1 === lvlNr) state[lvl.id] = {current:true};
-        else state[lvl.id] = {};
+        if(lIdx+1 < lesNr || (lIdx+1 === lesNr && idx+1 < lvlNr)) {
+          state[lvl.id] = {completed:true, attempts: 1};
+        } else if(lIdx+1 === lesNr && idx+1 === lvlNr) {
+          state[lvl.id] = {current:true, attempts: 0};
+        } else {
+          state[lvl.id] = { attempts: 0 };
+        }
       });
     });
     saveState();
@@ -540,7 +657,7 @@ document.getElementById('resetBtn').onclick = async ()=>{
   } else alert("De code is fout. Er verandert niets.");
 };
 
-if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
+if(Object.keys(state).length===0){ state[LESSONS[0].levels[0].id] = { current:true, attempts: 0 }; }
 
 </script>
 </body>
