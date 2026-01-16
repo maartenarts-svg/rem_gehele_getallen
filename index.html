@@ -315,7 +315,7 @@ window.completeLevel = async function(levelId, verdiendeXP, geslaagd){
 
   const messageBox = document.getElementById('messageBox');
   if(!geslaagd){
-    messageBox.innerText = `⚠️ Je bent gefaald bij level ${levelId}. Probeer het opnieuw.`;
+    messageBox.innerText = `⚠️ Je hebt level ${levelId} niet gehaald. Probeer het opnieuw.`;
     messageBox.style.display='block';
     setTimeout(()=>{ messageBox.style.display='none'; },5000);
   } else if(lvlNum === lesson.levels.length && geslaagd){
@@ -521,3 +521,4 @@ drawMap();
 </script>
 </body>
 </html>
+
