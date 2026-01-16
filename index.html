@@ -363,6 +363,29 @@ if(Object.keys(state).length===0){ LESSONS[0].levels[0].current=true; }
 
 drawMap();
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDIxC6htGU-SNrgYMiXSmIyBm1wHX-ObWk",
+  authDomain: "remediering-map.firebaseapp.com",
+  databaseURL: "https://remediering-map-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "remediering-map",
+  storageBucket: "remediering-map.firebasestorage.app",
+  messagingSenderId: "1070819853672",
+  appId: "1:1070819853672:web:b4cdefa00ae068826382dd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+console.log("🔥 Firebase verbonden");
+</script>
+
+
 </body>
 </html>
+
 
