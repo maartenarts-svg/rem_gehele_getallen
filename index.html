@@ -86,20 +86,27 @@ console.log("🔥 Firebase verbonden");
 function createLeerlingId(naam){ return "leerling_" + naam.toLowerCase().replace(/\s/g,"_"); }
 let leerlingIdGlobal; 
 
-function saveToFirebase() {
+async function saveToFirebase() {
   if(!leerlingIdGlobal) return;
-
-  // Alleen relevante level-data opslaan
-  const levelsToSave = Object.fromEntries(
-    Object.entries(state).filter(([k,v]) => k !== "xp" && (v.completed || v.failed || v.current))
-  );
-
-  set(ref(db, "leerlingen/" + leerlingIdGlobal), {
-    xp: state.xp,
-    levels: Object.fromEntries(Object.entries(state).filter(([k]) => k !== "xp")),
-    laatstBijgewerkt: Date.now()
-  }).then(()=>console.log("💾 Resultaten opgeslagen in Firebase"))
-    .catch(err=>console.error("❌ Fout bij opslaan:", err));
+  
+  const leerlingRef = ref(db, "leerlingen/" + leerlingIdGlobal);
+  
+  try {
+    const snapshot = await get(leerlingRef);
+    const bestaandeData = snapshot.exists() ? snapshot.val() : {};
+    
+    // Alleen levels, xp en laatstBijgewerkt updaten, de rest blijft behouden
+    await set(leerlingRef, {
+      ...bestaandeData,              // behoud naam, actief, etc.
+      xp: state.xp,
+      levels: Object.fromEntries(Object.entries(state).filter(([k]) => k !== "xp")),
+      laatstBijgewerkt: Date.now()
+    });
+    
+    console.log("💾 Resultaten opgeslagen in Firebase");
+  } catch(err) {
+    console.error("❌ Fout bij opslaan:", err);
+  }
 }
 
 function saveState(){ localStorage.setItem('mapState', JSON.stringify(state)); }
@@ -459,6 +466,7 @@ drawMap();
 </script>
 </body>
 </html>
+
 
 
 
