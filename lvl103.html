@@ -273,6 +273,7 @@ function showExercise() {
   checkBtn.style.display = 'inline-block';
   nextBtn.style.display = 'none';
   showArrowBtn.style.display = 'inline-block';
+  showArrowBtn.disabled = false; // <-- knop opnieuw aanklikbaar maken
 
   // Create radio buttons for positive/negative
   const positiveChoice = document.createElement('div');
@@ -305,6 +306,7 @@ function showExercise() {
   // Show arrow button
   showArrowBtn.onclick = () => {
     arrowShown = true;
+    showArrowBtn.disabled = true; // <- Voeg deze regel toe
     arrowContainer.style.display = 'block';
     
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
