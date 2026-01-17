@@ -97,7 +97,7 @@ function showExercise(){
     document.getElementById('LVL102resetBtn').style.display='none';
     document.getElementById('LVL102checkBtn').style.display='none';
     document.getElementById('LVL102nextBtn').style.display='none';
-    let geslaagd = xp >= 12;
+    let geslaagd = xp >= 7;
     const fb = document.getElementById('LVL102feedback');
     fb.style.display='none';
     let msg = geslaagd ? `🎉 Goed zo! Je hebt dit onder de knie!` : `Dit lukt nog niet zo goed.<br>Je hebt extra stappen nodig om dit doel te bereiken.`;
@@ -385,8 +385,7 @@ document.getElementById('LVL102checkBtn').onclick = ()=>{
   fb.innerHTML = feedbackMessages.length>0 ? feedbackMessages.join('<br>') : lengthFeedback || '✅ Goed gedaan!';
 
   if(correctAnswer){
-    const xpGained = currentIndex < 5 ? 1 : 2;
-    xp += xpGained;
+    xp += 1;
   }
 
   document.getElementById('LVL102resetBtn').style.display='none';
@@ -404,4 +403,5 @@ showExercise();
 </script>
 </body>
 </html>
+
 
