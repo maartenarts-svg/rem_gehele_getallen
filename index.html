@@ -91,7 +91,7 @@ document.getElementById('logoutBtn').style.display = 'none';
 document.getElementById('adminBtn').style.display = 'none';
 
 const LESSONS = [
-  {id:"les1", levels:[{id:"1-1"},{id:"1-2"},{id:"1-3"},{id:"1-4"},{id:"1-5"}]},
+  {id:"les1", levels:[{id:"1-1"},{id:"1-2"},{id:"1-3"},{id:"1-4"},{id:"1-5"},{id:"1-6"},{id:"1-7"},{id:"1-8"},{id:"1-9"}]},
   {id:"les2", levels:[{id:"2-1"},{id:"2-2"},{id:"2-3"},{id:"2-4"}]},
   {id:"les3", levels:[{id:"3-1"},{id:"3-2"},{id:"3-3"},{id:"3-4"}]},
   {id:"les4", levels:[{id:"4-1"},{id:"4-2"},{id:"4-3"},{id:"4-4"},{id:"4-5"},{id:"4-6"},{id:"4-7"},{id:"4-8"}]},
@@ -500,6 +500,14 @@ const LEVELS = {
     lc.innerHTML = `<iframe src="lvl105.html" style="width:100%;height:100%;border:none;"></iframe>`;
     lc.style.display='block';
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-5", verdiendeXP, geslaagd); };
+  },
+  "1-6": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+    lc.innerHTML = `<iframe src="lvl106.html" style="width:100%;height:100%;border:none;"></iframe>`;
+    lc.style.display='block';
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-6", verdiendeXP, geslaagd); };
   }
 };
 
@@ -512,23 +520,17 @@ function openLevel(levelId, lesName){
 
     lc.innerHTML = `
       <h2>${lesName} - Level ${levelId}</h2>
-      <div><label>Verdiende XP: <input class="xpInput" type="number" value="10"></label></div>
-      <div><label>Cesuur: <input class="cesuurInput" type="number" value="5"></label></div>
-      <button class="finishBtn">Beëindigen</button>
-      <button class="backBtn">OK</button>
-      <p>Gebruik dit template om je level-specifieke code of opdrachten in te vullen.</p>
+      <p style="font-size:18px; margin-top:20px;">
+        🚧 Deze level is nog niet beschikbaar.
+      </p>
+      <button class="backBtn" style="margin-top:30px;">Keer terug</button>
     `;
-    lc.style.display='block';
+    lc.style.display = 'block';
 
-    lc.querySelector('.finishBtn').onclick = () => {
-      const xp = Math.max(0, parseInt(lc.querySelector('.xpInput').value));
-      const cesuur = parseInt(lc.querySelector('.cesuurInput').value);
-      completeLevel(levelId, xp, xp >= cesuur);
-    };
     lc.querySelector('.backBtn').onclick = () => {
-      lc.style.display='none';
-      document.getElementById('mapContainer').style.display='block';
-      document.getElementById('xpDisplay').style.display='block';
+      lc.style.display = 'none';
+      document.getElementById('mapContainer').style.display = 'block';
+      document.getElementById('xpDisplay').style.display = 'block';
     };
   }
 }
@@ -813,6 +815,3 @@ if(Object.keys(state).length===0){ state[LESSONS[0].levels[0].id] = { current:tr
 </script>
 </body>
 </html>
-
-
-
