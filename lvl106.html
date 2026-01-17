@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 6 - Bereken de uitkomst met pijlenvoorstelling</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL6exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL6choices {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.radio-choice {
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  padding: 20px 40px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.radio-choice:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.radio-choice.selected {
+  border: 3px solid #007BFF;
+  background-color: #e0f0ff;
+}
+
+#LVL6arrowSection {
+  display: none;
+  margin: 20px auto;
+}
+
+#LVL6arrowChoices {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.arrow {
+  width: 120px;
+  height: 20px;
+  position: relative;
+  cursor: grab;
+}
+
+.arrow.fixed {
+  cursor: default;
+}
+
+.arrow .line {
+  height: 2px;
+  position: absolute;
+  top: 9px;
+}
+
+.arrow .tip {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  position: absolute;
+  top: 7px;
+}
+
+.arrow .dot {
+  width: 8px;
+  height: 8px;
+  background: black;
+  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+}
+
+#LVL6target {
+  width: 360px;
+  height: 120px;
+  margin: 0 auto 20px auto;
+  position: relative;
+}
+
+#LVL6target .axis {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: black;
+}
+
+#LVL6target .zero-line {
+  position: absolute;
+  top: 70px;
+  width: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 20px;
+  background: black;
+}
+
+#LVL6target .zero {
+  position: absolute;
+  top: 95px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+}
+
+#LVL6target .target-dot {
+  width: 8px;
+  height: 8px;
+  background: black;
+  border-radius: 50%;
+  position: absolute;
+}
+
+#LVL6feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 10px 5px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL6showArrowBtn {
+  background-color: #6c757d;
+}
+
+#LVL6showArrowBtn:hover:enabled {
+  background-color: #5a6268;
+}
+
+#LVL6resetBtn {
+  background-color: #ffc107;
+}
+
+#LVL6resetBtn:hover:enabled {
+  background-color: #e0a800;
+}
+
+#LVL6nextBtn {
+  background-color: #28a745;
+}
+
+#LVL6nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL6progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL6progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 6 - Bereken de uitkomst</h1>
+<div id="LVL6exercise"></div>
+<div id="LVL6choices"></div>
+<button id="LVL6showArrowBtn">Pijlenvoorstelling</button>
+
+<div id="LVL6arrowSection">
+  <div id="LVL6arrowChoices"></div>
+  <div id="LVL6target"></div>
+  <button id="LVL6resetBtn" disabled>Reset pijlen</button>
+</div>
+
+<button id="LVL6checkBtn" disabled>Controleer</button>
+<div id="LVL6feedback"></div>
+<button id="LVL6nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL6progressContainer">
+  <div id="LVL6progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let selectedAnswer = null;
+let arrowShown = false;
+
+const axisLength = 360;
+const longArrowLength = axisLength / 4;
+const shortArrowLength = axisLength / 8;
+
+let selectedArrows = [];
+let extraDot = null;
+let firstDot = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL6progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+
+  while(list.length < num) {
+    const firstNegative = Math.random() < 0.5;
+    const a = firstNegative ? -rand(5, 20) : rand(5, 20);
+    const b = rand(5, 20);
+    
+    if(Math.abs(a) === Math.abs(b)) continue;
+    
+    const op = Math.random() < 0.5 ? '+' : '-';
+    
+    const key = `${a}${op}${b}`;
+    if(!set.has(key)) {
+      set.add(key);
+      const result = op === '+' ? a + b : a - b;
+      const absA = Math.abs(a);
+      const absB = Math.abs(b);
+      const c = absA + absB;
+      const d = Math.abs(absA - absB);
+      
+      const choice1 = result < 0 ? -c : c;
+      const choice2 = result < 0 ? -d : d;
+      
+      list.push({a, b, op, result, choice1, choice2, correctAnswer: result});
+    }
+  }
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL6exercise');
+    const choicesDiv = document.getElementById('LVL6choices');
+    const fb = document.getElementById('LVL6feedback');
+    const checkBtn = document.getElementById('LVL6checkBtn');
+    const nextBtn = document.getElementById('LVL6nextBtn');
+    const showArrowBtn = document.getElementById('LVL6showArrowBtn');
+    const arrowSection = document.getElementById('LVL6arrowSection');
+    const resetBtn = document.getElementById('LVL6resetBtn');
+
+    choicesDiv.innerHTML = '';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    showArrowBtn.style.display = 'none';
+    arrowSection.style.display = 'none';
+    resetBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL6backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL6backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  selectedAnswer = null;
+  arrowShown = false;
+  selectedArrows = [];
+  extraDot = null;
+
+  document.getElementById('LVL6exercise').innerHTML = `${ex.a} ${ex.op} ${ex.b}`;
+  
+  const fb = document.getElementById('LVL6feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const choicesDiv = document.getElementById('LVL6choices');
+  choicesDiv.innerHTML = '';
+
+  const arrowSection = document.getElementById('LVL6arrowSection');
+  arrowSection.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL6checkBtn');
+  const nextBtn = document.getElementById('LVL6nextBtn');
+  const showArrowBtn = document.getElementById('LVL6showArrowBtn');
+  const resetBtn = document.getElementById('LVL6resetBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+  showArrowBtn.style.display = 'inline-block';
+  showArrowBtn.disabled = false;
+  resetBtn.disabled = true;
+
+  // Create radio buttons
+  const choice1Div = document.createElement('div');
+  choice1Div.className = 'radio-choice';
+  choice1Div.innerHTML = ex.choice1;
+  choice1Div.dataset.value = ex.choice1;
+  choice1Div.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 0;
+    choice1Div.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  const choice2Div = document.createElement('div');
+  choice2Div.className = 'radio-choice';
+  choice2Div.innerHTML = ex.choice2;
+  choice2Div.dataset.value = ex.choice2;
+  choice2Div.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 1;
+    choice2Div.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  choicesDiv.appendChild(choice1Div);
+  choicesDiv.appendChild(choice2Div);
+
+  // Show arrow button
+  showArrowBtn.onclick = () => {
+    arrowShown = true;
+    arrowSection.style.display = 'block';
+    showArrowBtn.disabled = true;
+    
+    setupArrowDragDrop();
+  };
+
+  checkBtn.onclick = () => {
+    const children = choicesDiv.children;
+    const userAnswer = parseInt(children[selectedAnswer].dataset.value);
+    
+    for(let i = 0; i < children.length; i++) {
+      children[i].style.pointerEvents = 'none';
+    }
+
+    const fb = document.getElementById('LVL6feedback');
+    let isCorrectAnswer = (userAnswer === ex.correctAnswer);
+    let feedbackMessages = [];
+    let lengthFeedback = '';
+    let arrowDiagramCorrect = false;
+    let arrowDiagramComplete = false;
+
+    // Check if arrow diagram was made and is complete
+    if(arrowShown && selectedArrows.length === 2) {
+      arrowDiagramComplete = true;
+      
+      const arrowA = selectedArrows.find(a => a.dataset.term === 'a');
+      const arrowB = selectedArrows.find(a => a.dataset.term === 'b');
+
+      // Check direction correctness
+      const dirACorrect = (ex.a >= 0 && arrowA.dataset.dir === 'right') || (ex.a < 0 && arrowA.dataset.dir === 'left');
+      const dirBCorrect = ((ex.op === '+' && arrowB.dataset.dir === 'right') || (ex.op === '-' && arrowB.dataset.dir === 'left'));
+
+      if(!dirACorrect) {
+        if(arrowA.dataset.dir === 'right') {
+          feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar rechts. Maar het eerste getal is negatief, dus moet de eerste pijl naar links gaan.`);
+        } else {
+          feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar links. Maar het eerste getal is positief, dus moet de eerste pijl naar rechts gaan.`);
+        }
+      }
+
+      if(!dirBCorrect) {
+        if(arrowB.dataset.dir === 'right') {
+          feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar rechts. Maar je trekt een positief getal af, dus de tweede pijl moet naar links gaan.`);
+        } else {
+          feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar links. Maar je telt een positief getal op, dus de tweede pijl moet naar rechts gaan.`);
+        }
+      }
+
+      // Check length correctness (only if directions are correct)
+      if(dirACorrect && dirBCorrect) {
+        const lenA = arrowA.querySelector('.line').offsetWidth;
+        const lenB = arrowB.querySelector('.line').offsetWidth;
+        const absA = Math.abs(ex.a);
+        const absB = Math.abs(ex.b);
+
+        if(absA > absB && lenA <= lenB) {
+          lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het eerste getal heeft de grootste absolute waarde. De eerste (onderste) pijl moet dus langer zijn dan de tweede pijl.`;
+        } else if(absA < absB && lenA >= lenB) {
+          lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.`;
+        } else {
+          arrowDiagramCorrect = true;
+        }
+      }
+    }
+
+    // Case 1: Correct answer
+    if(isCorrectAnswer && (!arrowDiagramComplete || arrowDiagramCorrect)) {
+      children[selectedAnswer].style.backgroundColor = 'lightgreen';
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } 
+    // Case 2: Correct answer but wrong arrow diagram
+    else if(isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.choice1 === ex.correctAnswer ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      fb.innerHTML = 'Het pijlenschema komt niet overeen met de oefening. Daarom wordt deze oefening fout gerekend, ook al is je antwoord correct.';
+      fb.style.display = 'block';
+    }
+    // Case 3: Wrong answer, no arrow diagram shown (or incomplete)
+    else if(!isCorrectAnswer && (!arrowShown || !arrowDiagramComplete)) {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.choice1 === ex.correctAnswer ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      fb.innerHTML = 'Maak de volgende keer de pijlenvoorstelling. Het kan je helpen.';
+      fb.style.display = 'block';
+    }
+    // Case 4: Wrong answer with correct arrow diagram
+    else if(!isCorrectAnswer && arrowDiagramComplete && arrowDiagramCorrect) {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.choice1 === ex.correctAnswer ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      fb.innerHTML = 'Bestudeer grondig de pijlenvoorstelling. Wat moet je doen met de lengtes van de pijlen? Optellen of aftrekken?';
+      fb.style.display = 'block';
+    }
+    // Case 5: Wrong answer with incorrect arrow diagram
+    else if(!isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.choice1 === ex.correctAnswer ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      let finalFeedback = 'Het pijlenschema is niet correct.<br>';
+      if(feedbackMessages.length > 0) {
+        finalFeedback += feedbackMessages.join('<br>');
+      } else {
+        finalFeedback += lengthFeedback;
+      }
+      
+      fb.innerHTML = finalFeedback;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    showArrowBtn.style.display = 'none';
+    resetBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+function setupArrowDragDrop() {
+  const ex = exercises[currentIndex];
+  const arrowChoicesDiv = document.getElementById('LVL6arrowChoices');
+  arrowChoicesDiv.innerHTML = '';
+
+  const arrowData = [
+    {color:'blue', dir:'right', len:longArrowLength, idx:0},
+    {color:'blue', dir:'right', len:shortArrowLength, idx:1},
+    {color:'orange', dir:'left', len:longArrowLength, idx:2},
+    {color:'orange', dir:'left', len:shortArrowLength, idx:3}
+  ];
+
+  const targetDiv = document.getElementById('LVL6target');
+  targetDiv.innerHTML = '<div class="axis"></div>';
+
+  const zeroLine = document.createElement('div');
+  zeroLine.className = 'zero-line';
+  targetDiv.appendChild(zeroLine);
+
+  const zeroLabel = document.createElement('div');
+  zeroLabel.className = 'zero';
+  zeroLabel.innerText = '0';
+  targetDiv.appendChild(zeroLabel);
+
+  firstDot = document.createElement('div');
+  firstDot.className = 'target-dot';
+  firstDot.style.left = '50%';
+  firstDot.style.transform = 'translateX(-50%)';
+  firstDot.style.top = '50px';
+  firstDot.dataset.idx = '0';
+  targetDiv.appendChild(firstDot);
+
+  arrowData.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'arrow';
+    div.style.width = a.len + 'px';
+
+    const line = document.createElement('div');
+    line.className = 'line';
+    line.style.background = a.color;
+    line.style.width = a.len + 'px';
+    line.style.left = '0';
+    div.appendChild(line);
+
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    tip.style.borderTopColor = 'transparent';
+    tip.style.borderBottomColor = 'transparent';
+    tip.style.top = '5px';
+    if(a.dir === 'right') {
+      tip.style.borderLeft = `10px solid ${a.color}`;
+      tip.style.left = (a.len - 10) + 'px';
+    } else {
+      tip.style.borderRight = `10px solid ${a.color}`;
+      tip.style.left = '0px';
+    }
+    div.appendChild(tip);
+
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.left = a.dir === 'right' ? '0px' : (a.len - 8) + 'px';
+    div.appendChild(dot);
+
+    div.dataset.idx = a.idx;
+    div.dataset.color = a.color;
+    div.dataset.dir = a.dir;
+    div.dataset.len = a.len;
+
+    div.onmousedown = dragMouseDown;
+    arrowChoicesDiv.appendChild(div);
+  });
+
+  function dragMouseDown(e) {
+    if(this.classList.contains('fixed')) return;
+    e.preventDefault();
+    let elm = this;
+
+    const shiftX = e.clientX - elm.getBoundingClientRect().left;
+    const shiftY = e.clientY - elm.getBoundingClientRect().top;
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.style.width = elm.offsetWidth + 'px';
+    placeholder.style.height = elm.offsetHeight + 'px';
+    const parent = elm.parentNode;
+    parent.insertBefore(placeholder, elm);
+    elm.style.position = 'absolute';
+    elm.style.zIndex = 1000;
+
+    function moveAt(pageX, pageY) {
+      elm.style.left = pageX - shiftX + 'px';
+      elm.style.top = pageY - shiftY + 'px';
+    }
+
+    function onMouseMove(event) {
+      moveAt(event.pageX, event.pageY);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+
+    elm.onmouseup = function() {
+      document.removeEventListener('mousemove', onMouseMove);
+      elm.onmouseup = null;
+
+      const startDot = extraDot ? extraDot : firstDot;
+      const dot = elm.querySelector('.dot');
+      const dotRect = dot.getBoundingClientRect();
+      const targetRect = startDot.getBoundingClientRect();
+
+      if(Math.abs(dotRect.left - targetRect.left) < 15 && Math.abs(dotRect.top - targetRect.top) < 15) {
+        elm.style.display = 'none';
+
+        const arrowLen = parseFloat(elm.dataset.len);
+        const dir = elm.dataset.dir;
+        const color = elm.dataset.color;
+
+        const startX = startDot.offsetLeft + startDot.offsetWidth / 2;
+        const startY = startDot.offsetTop + startDot.offsetHeight / 2;
+        const endX = dir === 'right' ? startX + arrowLen : startX - arrowLen;
+
+        const newArrow = document.createElement('div');
+        newArrow.className = 'arrow';
+        newArrow.style.position = 'absolute';
+        newArrow.style.left = Math.min(startX, endX) + 'px';
+        newArrow.style.top = startY - 9 + 'px';
+
+        if(!selectedArrows.find(a => a.dataset.term === 'a')) {
+          newArrow.dataset.value = Math.abs(ex.a);
+          newArrow.dataset.term = 'a';
+        } else {
+          newArrow.dataset.value = Math.abs(ex.b);
+          newArrow.dataset.term = 'b';
+        }
+        newArrow.dataset.dir = dir;
+
+        const line = document.createElement('div');
+        line.className = 'line';
+        line.style.background = color;
+        line.style.position = 'absolute';
+        line.style.left = '0px';
+        line.style.top = '9px';
+        line.style.width = Math.abs(endX - startX) + 'px';
+        newArrow.appendChild(line);
+
+        const tip = document.createElement('div');
+        tip.className = 'tip';
+        tip.style.borderTopColor = 'transparent';
+        tip.style.borderBottomColor = 'transparent';
+        tip.style.top = '5px';
+        if(dir === 'right') {
+          tip.style.borderLeft = `10px solid ${color}`;
+          tip.style.left = (Math.abs(endX - startX) - 10) + 'px';
+        } else {
+          tip.style.borderRight = `10px solid ${color}`;
+          tip.style.left = '0px';
+        }
+        newArrow.appendChild(tip);
+
+        targetDiv.appendChild(newArrow);
+        selectedArrows.push(newArrow);
+
+        if(!extraDot) {
+          extraDot = document.createElement('div');
+          extraDot.className = 'target-dot';
+          const offsetX = dir === 'right' ? arrowLen : -arrowLen;
+          extraDot.style.left = (firstDot.offsetLeft + offsetX) + 'px';
+          extraDot.style.top = (firstDot.offsetTop - 30) + 'px';
+          targetDiv.appendChild(extraDot);
+        }
+
+        document.getElementById('LVL6resetBtn').disabled = false;
+
+        if(selectedArrows.length === 2) {
+          const remainingArrows = document.querySelectorAll('#LVL6arrowChoices .arrow');
+          remainingArrows.forEach(a => {
+            a.classList.add('fixed');
+            a.style.cursor = 'default';
+          });
+        }
+
+      } else {
+        parent.insertBefore(elm, placeholder);
+        elm.style.position = '';
+        elm.style.left = '';
+        elm.style.top = '';
+      }
+      placeholder.remove();
+    };
+  }
+
+  // Reset button
+  document.getElementById('LVL6resetBtn').onclick = () => {
+    selectedArrows.forEach(a => a.remove());
+    selectedArrows = [];
+    if(extraDot) {
+      extraDot.remove();
+      extraDot = null;
+    }
+
+    const choices = document.querySelectorAll('#LVL6arrowChoices .arrow');
+    choices.forEach(c => {
+      c.style.display = 'block';
+      c.style.position = '';
+      c.style.left = '';
+      c.style.top = '';
+      c.classList.remove('fixed');
+      c.style.cursor = 'grab';
+    });
+
+    document.querySelectorAll('#LVL6arrowChoices .placeholder').forEach(p => p.remove());
+    document.getElementById('LVL6resetBtn').disabled = true;
+  };
+}
+
+document.getElementById('LVL6nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
