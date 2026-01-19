@@ -556,6 +556,14 @@ const LEVELS = {
     lc.innerHTML = `<iframe src="lvl112.html" style="width:100%;height:100%;border:none;"></iframe>`;
     lc.style.display='block';
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-12", verdiendeXP, geslaagd); };
+  },
+  "2-1": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+    lc.innerHTML = `<iframe src="lvl201.html" style="width:100%;height:100%;border:none;"></iframe>`;
+    lc.style.display='block';
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("2-1", verdiendeXP, geslaagd); };
   }
 };
 
@@ -863,6 +871,7 @@ if(Object.keys(state).length===0){ state[LESSONS[0].levels[0].id] = { current:tr
 </script>
 </body>
 </html>
+
 
 
 
