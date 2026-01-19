@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 9 - Bereken de uitkomst</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL9exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL9answerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#LVL9signDisplay {
+  font-size: 32px;
+  color: #2c3e50;
+}
+
+#LVL9answerInput {
+  width: 100px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+#LVL9answerInput:focus {
+  border-color: #007BFF;
+}
+
+#LVL9arrowContainer {
+  display: block;
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+svg {
+  width: 360px;
+  height: 60px;
+  display: block;
+  margin: 0 auto;
+}
+
+#LVL9feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 10px 5px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL9showArrowBtn {
+  background-color: #6c757d;
+}
+
+#LVL9showArrowBtn:hover:enabled {
+  background-color: #5a6268;
+}
+
+#LVL9nextBtn {
+  background-color: #28a745;
+}
+
+#LVL9nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL9progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL9progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 9 - Bereken de uitkomst</h1>
+<div id="LVL9exercise"></div>
+<div id="LVL9answerSection">
+  <span id="LVL9signDisplay"></span>
+  <input type="number" id="LVL9answerInput" min="0" placeholder="?" />
+</div>
+<button id="LVL9showArrowBtn">Pijlenvoorstelling</button>
+<div id="LVL9arrowContainer"></div>
+<button id="LVL9checkBtn" disabled>Controleer</button>
+<div id="LVL9feedback"></div>
+<button id="LVL9nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL9progressContainer">
+  <div id="LVL9progressBar"></div>
+</div>
+
+<script>
+const maxLength = 90;
+const minLength = 45;
+const centerX = 180;
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let arrowShown = false;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL9progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+
+  while(list.length < num) {
+    const firstNegative = Math.random() < 0.5;
+    const a = firstNegative ? -rand(5, 20) : rand(5, 20);
+    const b = rand(5, 20);
+    
+    if(Math.abs(a) === Math.abs(b)) continue;
+    
+    const op = Math.random() < 0.5 ? '+' : '-';
+    
+    const key = `${a}${op}${b}`;
+    if(!set.has(key)) {
+      set.add(key);
+      const result = op === '+' ? a + b : a - b;
+      const absA = Math.abs(a);
+      const absB = Math.abs(b);
+      const c = absA + absB;
+      const d = Math.abs(absA - absB);
+      
+      list.push({a, b, op, result, correctAbsValue: Math.abs(result), c, d});
+    }
+  }
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL9exercise');
+    const answerSection = document.getElementById('LVL9answerSection');
+    const fb = document.getElementById('LVL9feedback');
+    const checkBtn = document.getElementById('LVL9checkBtn');
+    const nextBtn = document.getElementById('LVL9nextBtn');
+    const showArrowBtn = document.getElementById('LVL9showArrowBtn');
+    const arrowContainer = document.getElementById('LVL9arrowContainer');
+
+    answerSection.style.display = 'none';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    showArrowBtn.style.display = 'none';
+    arrowContainer.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL9backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL9backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+
+  arrowShown = false;
+
+  document.getElementById('LVL9exercise').innerHTML = `${ex.a} ${ex.op} ${ex.b}`;
+  
+  // Display the sign
+  const signDisplay = document.getElementById('LVL9signDisplay');
+  signDisplay.textContent = ex.result >= 0 ? '+' : '−';
+  
+  // Reset input
+  const answerInput = document.getElementById('LVL9answerInput');
+  answerInput.value = '';
+  answerInput.disabled = false;
+  answerInput.style.backgroundColor = '';
+  
+  const fb = document.getElementById('LVL9feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const arrowContainer = document.getElementById('LVL9arrowContainer');
+  arrowContainer.style.display = 'none';
+  arrowContainer.innerHTML = '';
+
+  const checkBtn = document.getElementById('LVL9checkBtn');
+  const nextBtn = document.getElementById('LVL9nextBtn');
+  const showArrowBtn = document.getElementById('LVL9showArrowBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+  showArrowBtn.style.display = 'inline-block';
+  showArrowBtn.disabled = false;
+
+  // Enable check button when input has value
+  answerInput.oninput = () => {
+    checkBtn.disabled = answerInput.value === '';
+  };
+
+  // Show arrow button
+  showArrowBtn.onclick = () => {
+    arrowShown = true;
+    arrowContainer.style.display = 'block';
+    showArrowBtn.disabled = true;
+    
+    drawArrowDiagram(ex, arrowContainer);
+  };
+
+  checkBtn.onclick = () => {
+    const userAbsValue = parseInt(answerInput.value);
+    answerInput.disabled = true;
+    
+    const fb = document.getElementById('LVL9feedback');
+    const isCorrect = (userAbsValue === ex.correctAbsValue);
+
+    if(isCorrect) {
+      answerInput.style.backgroundColor = 'lightgreen';
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } else {
+      answerInput.style.backgroundColor = '#ffcccc';
+      
+      let feedbackText = `Het juiste antwoord is ${ex.result >= 0 ? '+' : '−'}${ex.correctAbsValue}.<br>`;
+      
+      if(!arrowShown) {
+        feedbackText += 'Maak de volgende keer de pijlenvoorstelling zichtbaar. Het kan je helpen.';
+      } else {
+        // Check if arrows point in same direction
+        let sameDirection = false;
+        if(ex.a > 0 && ex.op === '+') {
+          sameDirection = true;
+        } else if(ex.a < 0 && ex.op === '-') {
+          sameDirection = true;
+        } else {
+          sameDirection = false;
+        }
+        
+        const absA = Math.abs(ex.a);
+        const absB = Math.abs(ex.b);
+        const maxAbsValue = Math.max(absA, absB);
+        
+        // Detect if it's a calculation error or conceptual error
+        let isCalculationError = false;
+        
+        if(sameDirection) {
+          // Should add: if answer > max absolute value → calculation error
+          if(userAbsValue > maxAbsValue) {
+            isCalculationError = true;
+          }
+        } else {
+          // Should subtract: if answer < max absolute value → calculation error
+          if(userAbsValue < maxAbsValue) {
+            isCalculationError = true;
+          }
+        }
+        
+        // Build feedback
+        if(isCalculationError) {
+          feedbackText += 'Je hebt de juiste strategie gebruikt, maar er is een rekenfout ingeslopen. Controleer je berekening nog eens.';
+        } else {
+          // Give conceptual feedback
+          if(sameDirection) {
+            feedbackText += 'De pijlen gaan dezelfde kant op. De absolute waarde van de uitkomst krijg je dan door de lengtes van de twee pijlen op te tellen.';
+          } else {
+            feedbackText += 'De pijlen gaan elk een verschillende kant op. De absolute waarde van de uitkomst krijg je dan door het verschil te maken van de lengtes van de twee pijlen.';
+          }
+        }
+      }
+      
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    showArrowBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+function drawArrow(svg, x1, y1, x2, y2, color) {
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", x1);
+  line.setAttribute("y1", y1);
+  line.setAttribute("x2", x2);
+  line.setAttribute("y2", y2);
+  line.setAttribute("stroke", color);
+  line.setAttribute("stroke-width", 2);
+  svg.appendChild(line);
+
+  const markerSize = 7;
+  const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+  if(x2 > x1) {
+    arrow.setAttribute("points", `${x2},${y2} ${x2-markerSize},${y2-markerSize/2} ${x2-markerSize},${y2+markerSize/2}`);
+  } else {
+    arrow.setAttribute("points", `${x2},${y2} ${x2+markerSize},${y2-markerSize/2} ${x2+markerSize},${y2+markerSize/2}`);
+  }
+  arrow.setAttribute("fill", color);
+  svg.appendChild(arrow);
+}
+
+function drawArrowDiagram(ex, container) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+  // Draw number line
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", 0);
+  line.setAttribute("y1", 50);
+  line.setAttribute("x2", 360);
+  line.setAttribute("y2", 50);
+  line.setAttribute("stroke", "black");
+  line.setAttribute("stroke-width", 2);
+  svg.appendChild(line);
+
+  // Draw zero mark
+  const zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  zeroLine.setAttribute("x1", centerX);
+  zeroLine.setAttribute("y1", 45);
+  zeroLine.setAttribute("x2", centerX);
+  zeroLine.setAttribute("y2", 55);
+  zeroLine.setAttribute("stroke", "black");
+  zeroLine.setAttribute("stroke-width", 2);
+  svg.appendChild(zeroLine);
+
+  const zeroText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  zeroText.setAttribute("x", centerX - 5);
+  zeroText.setAttribute("y", 40);
+  zeroText.setAttribute("font-size", "12");
+  zeroText.textContent = "0";
+  svg.appendChild(zeroText);
+
+  // Determine arrow colors and directions
+  const absA = Math.abs(ex.a);
+  const absB = Math.abs(ex.b);
+  
+  const firstLength = absA > absB ? maxLength : minLength;
+  const secondLength = absB > absA ? maxLength : minLength;
+  
+  let firstColor, secondColor;
+  let firstDir, secondDir;
+  
+  if(ex.a > 0 && ex.op === '+') {
+    firstColor = 'blue';
+    secondColor = 'blue';
+    firstDir = 'right';
+    secondDir = 'right';
+  } else if(ex.a < 0 && ex.op === '+') {
+    firstColor = 'orange';
+    secondColor = 'blue';
+    firstDir = 'left';
+    secondDir = 'right';
+  } else if(ex.a > 0 && ex.op === '-') {
+    firstColor = 'blue';
+    secondColor = 'orange';
+    firstDir = 'right';
+    secondDir = 'left';
+  } else {
+    firstColor = 'orange';
+    secondColor = 'orange';
+    firstDir = 'left';
+    secondDir = 'left';
+  }
+  
+  const firstX = firstDir === 'right' ? firstLength : -firstLength;
+  const secondX = secondDir === 'right' ? secondLength : -secondLength;
+
+  drawArrow(svg, centerX, 30, centerX + firstX, 30, firstColor);
+  drawArrow(svg, centerX + firstX, 10, centerX + firstX + secondX, 10, secondColor);
+
+  container.appendChild(svg);
+}
+
+document.getElementById('LVL9nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
