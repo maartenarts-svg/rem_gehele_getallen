@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 2 - Herschrijf de opgave</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL22exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL22answerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#LVL22answerInput {
+  width: 200px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+#LVL22answerInput:focus {
+  border-color: #007BFF;
+}
+
+#LVL22feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 10px 5px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL22nextBtn {
+  background-color: #28a745;
+}
+
+#LVL22nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL22progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL22progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 2 - Herschrijf de opgave</h1>
+<div id="LVL22exercise"></div>
+<div id="LVL22answerSection">
+  <input type="text" id="LVL22answerInput" placeholder="?" />
+</div>
+<button id="LVL22checkBtn" disabled>Controleer</button>
+<div id="LVL22feedback"></div>
+<button id="LVL22nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL22progressContainer">
+  <div id="LVL22progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL22progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+
+  while(list.length < num) {
+    const firstNegative = Math.random() < 0.5;
+    const a = firstNegative ? -rand(5, 20) : rand(5, 20);
+    const b = -rand(5, 20); // Always negative
+    
+    if(Math.abs(a) === Math.abs(b)) continue;
+    
+    const op = Math.random() < 0.5 ? '+' : '-';
+    
+    const key = `${a}${op}${b}`;
+    if(!set.has(key)) {
+      set.add(key);
+      
+      const absA = Math.abs(a);
+      const absB = Math.abs(b);
+      const signA = a >= 0 ? '+' : '-';
+      
+      let correctAnswer, correctOp, correctSignB;
+      
+      if(op === '+') {
+        // a + (-b) becomes a - b
+        correctOp = '-';
+        correctSignB = '+';
+        correctAnswer = a >= 0 ? `${a} - ${absB}` : `${a} - ${absB}`;
+      } else {
+        // a - (-b) becomes a + b
+        correctOp = '+';
+        correctSignB = '+';
+        correctAnswer = a >= 0 ? `${a} + ${absB}` : `${a} + ${absB}`;
+      }
+      
+      list.push({
+        a, 
+        b, 
+        op, 
+        correctAnswer,
+        correctSignA: signA,
+        correctAbsA: absA,
+        correctOp: correctOp,
+        correctSignB: correctSignB,
+        correctAbsB: absB
+      });
+    }
+  }
+  return list;
+}
+
+function parseAnswer(answer) {
+  // Remove all spaces
+  answer = answer.replace(/\s/g, '');
+  
+  // Check for parentheses
+  if(answer.includes('(') || answer.includes(')')) {
+    return {error: 'parentheses'};
+  }
+  
+  // Check if it's just a number (no operation)
+  if(/^-?\d+$/.test(answer)) {
+    return {error: 'just_number'};
+  }
+  
+  // Parse: [sign1][number1][operation][sign2?][number2]
+  // Regex to match: optional sign, digits, operator, optional sign, digits
+  const match = answer.match(/^(-?)(\d+)([\+\-])(-?)(\d+)$/);
+  
+  if(!match) {
+    return {error: 'invalid_format'};
+  }
+  
+  const sign1 = match[1] === '-' ? '-' : '+';
+  const abs1 = parseInt(match[2]);
+  const operation = match[3];
+  const sign2 = match[4] === '-' ? '-' : '+';
+  const abs2 = parseInt(match[5]);
+  
+  return {
+    sign1,
+    abs1,
+    operation,
+    sign2,
+    abs2
+  };
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL22exercise');
+    const answerSection = document.getElementById('LVL22answerSection');
+    const fb = document.getElementById('LVL22feedback');
+    const checkBtn = document.getElementById('LVL22checkBtn');
+    const nextBtn = document.getElementById('LVL22nextBtn');
+
+    answerSection.style.display = 'none';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL22backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL22backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+
+  // Format exercise with parentheses around negative second number
+  const bFormatted = ex.b < 0 ? `(${ex.b})` : ex.b;
+  document.getElementById('LVL22exercise').innerHTML = `${ex.a} ${ex.op} ${bFormatted}`;
+  
+  // Reset input
+  const answerInput = document.getElementById('LVL22answerInput');
+  answerInput.value = '';
+  answerInput.disabled = false;
+  answerInput.style.backgroundColor = '';
+  
+  const fb = document.getElementById('LVL22feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL22checkBtn');
+  const nextBtn = document.getElementById('LVL22nextBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+
+  // Enable check button when input has value
+  answerInput.oninput = () => {
+    checkBtn.disabled = answerInput.value.trim() === '';
+  };
+
+  checkBtn.onclick = () => {
+    const userAnswerStr = answerInput.value.trim();
+    answerInput.disabled = true;
+    
+    const fb = document.getElementById('LVL22feedback');
+    const parsed = parseAnswer(userAnswerStr);
+    
+    // Check for errors in order of priority
+    if(parsed.error === 'parentheses') {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = 'Na het herschrijven kunnen er geen haakjes meer staan.';
+      fb.style.display = 'block';
+    } else if(parsed.error === 'just_number') {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = 'De opgave is enkel herschrijven. Je rekent nog niets uit.';
+      fb.style.display = 'block';
+    } else if(parsed.error === 'invalid_format') {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Het juiste antwoord is ${ex.correctAnswer}.`;
+      fb.style.display = 'block';
+    } else {
+      // Check if numbers are changed
+      if(parsed.abs1 !== ex.correctAbsA || parsed.abs2 !== ex.correctAbsB) {
+        answerInput.style.backgroundColor = '#ffcccc';
+        fb.innerHTML = 'Je verandert de getallen. Check je antwoord voor je op controleren drukt.';
+        fb.style.display = 'block';
+      } else {
+        // Numbers are correct, check the rest
+        const sign1Correct = parsed.sign1 === ex.correctSignA;
+        const opCorrect = parsed.operation === ex.correctOp;
+        const sign2Correct = parsed.sign2 === ex.correctSignB;
+        
+        const isCorrect = sign1Correct && opCorrect && sign2Correct;
+        
+        if(isCorrect) {
+          answerInput.style.backgroundColor = 'lightgreen';
+          fb.innerText = '✅ Correct!';
+          fb.style.display = 'block';
+          xp += 1;
+        } else {
+          answerInput.style.backgroundColor = '#ffcccc';
+          
+          let feedbackText = '';
+          
+          // Check what the student changed compared to ORIGINAL exercise
+          const changedFirstSign = (parsed.sign1 !== ex.correctSignA);
+          const changedOperation = (parsed.operation !== ex.op); // Compare to ORIGINAL operation
+          const changedSecondSign = (parsed.sign2 !== '+'); // Second number should always be positive in rewrite
+          
+          if(ex.op === '+') {
+            // Original: a + (-b), correct rewrite: a - b
+            if(changedFirstSign && !changedOperation) {
+              // Student wrote: -a + b (changed first, kept operation)
+              feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+            } else if(changedFirstSign && changedOperation) {
+              // Student wrote: -a - b (changed first, changed operation)
+              feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+            } else if(!changedFirstSign && !changedOperation) {
+              // Student wrote: a + b (kept first, kept operation)
+              feedbackText = 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+            } else {
+              // This shouldn't happen in normal cases, fallback
+              feedbackText = 'Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+            }
+          } else {
+            // Original: a - (-b), correct rewrite: a + b
+            if(changedFirstSign && !changedOperation) {
+              // Student wrote: -a - b (changed first, kept operation)
+              feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+            } else if(changedFirstSign && changedOperation) {
+              // Student wrote: -a + b (changed first, changed operation)
+              feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+            } else if(!changedFirstSign && !changedOperation) {
+              // Student wrote: a - b (kept first, kept operation)
+              feedbackText = 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+            } else {
+              // This shouldn't happen in normal cases, fallback
+              feedbackText = 'Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+            }
+          }
+          
+          // If no feedback was set (shouldn't happen, but safety check)
+          if(!feedbackText) {
+            feedbackText = `Het juiste antwoord is ${ex.correctAnswer}.`;
+          }
+          
+          fb.innerHTML = feedbackText;
+          fb.style.display = 'block';
+        }
+      }
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL22nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
