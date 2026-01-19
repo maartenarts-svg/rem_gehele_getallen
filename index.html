@@ -532,6 +532,30 @@ const LEVELS = {
     lc.innerHTML = `<iframe src="lvl109.html" style="width:100%;height:100%;border:none;"></iframe>`;
     lc.style.display='block';
     window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-9", verdiendeXP, geslaagd); };
+  },
+  "1-10": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+    lc.innerHTML = `<iframe src="lvl110.html" style="width:100%;height:100%;border:none;"></iframe>`;
+    lc.style.display='block';
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-10", verdiendeXP, geslaagd); };
+  },
+  "1-11": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+    lc.innerHTML = `<iframe src="lvl111.html" style="width:100%;height:100%;border:none;"></iframe>`;
+    lc.style.display='block';
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-11", verdiendeXP, geslaagd); };
+  },
+  "1-12": function() {
+    const lc = document.getElementById('levelContainer');
+    document.getElementById('mapContainer').style.display = 'none';
+    document.getElementById('xpDisplay').style.display = 'none';
+    lc.innerHTML = `<iframe src="lvl112.html" style="width:100%;height:100%;border:none;"></iframe>`;
+    lc.style.display='block';
+    window.completeLevelFromIframe = function(verdiendeXP, geslaagd){ completeLevel("1-12", verdiendeXP, geslaagd); };
   }
 };
 
@@ -839,6 +863,7 @@ if(Object.keys(state).length===0){ state[LESSONS[0].levels[0].id] = { current:tr
 </script>
 </body>
 </html>
+
 
 
 
