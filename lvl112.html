@@ -267,6 +267,7 @@ function updateProgressBar() {
 function generateUniqueExercises(num) {
   const list = [];
   const set = new Set();
+  let easyCount = 0; // Count of "easy" exercises (both positive, positive result)
 
   while(list.length < num) {
     const firstNegative = Math.random() < 0.5;
@@ -279,12 +280,25 @@ function generateUniqueExercises(num) {
     
     const key = `${a}${op}${b}`;
     if(!set.has(key)) {
-      set.add(key);
       const result = op === '+' ? a + b : a - b;
+      
+      // Check if this is an "easy" exercise (both positive and result positive)
+      const isEasy = (a > 0 && result > 0);
+      
+      // If we already have 3 easy exercises, skip this one if it's easy
+      if(isEasy && easyCount >= 3) {
+        continue;
+      }
+      
+      set.add(key);
       const absA = Math.abs(a);
       const absB = Math.abs(b);
       const c = absA + absB;
       const d = Math.abs(absA - absB);
+      
+      if(isEasy) {
+        easyCount++;
+      }
       
       list.push({a, b, op, result, correctAbsValue: Math.abs(result), c, d});
     }
