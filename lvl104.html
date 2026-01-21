@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Level 1-4 - Teken bepalen met pijlenvoorstelling</title>
+<title>Level 4 - Teken bepalen met pijlenvoorstelling</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -162,7 +162,7 @@ h1 {
 
 button {
   padding: 12px 25px;
-  margin: 10px 5px;
+  margin: 0;
   cursor: pointer;
   border-radius: 12px;
   border: none;
@@ -230,7 +230,11 @@ button:disabled {
 <h1>Level 4 - Duid het teken van het resultaat aan</h1>
 <div id="LVL104exercise"></div>
 <div id="LVL104choices"></div>
-<button id="LVL104showArrowBtn">Pijlenvoorstelling</button>
+
+<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0;">
+  <button id="LVL104showArrowBtn">Pijlenvoorstelling</button>
+  <button id="LVL104checkBtn" disabled>Controleer</button>
+</div>
 
 <div id="LVL104arrowSection">
   <div id="LVL104arrowChoices"></div>
@@ -238,7 +242,6 @@ button:disabled {
   <button id="LVL104resetBtn" disabled>Reset pijlen</button>
 </div>
 
-<button id="LVL104checkBtn" disabled>Controleer</button>
 <div id="LVL104feedback"></div>
 <button id="LVL104nextBtn" style="display:none;">Volgende oefening</button>
 
@@ -374,6 +377,7 @@ function showExercise() {
   showArrowBtn.style.display = 'inline-block';
   showArrowBtn.disabled = false;
   resetBtn.disabled = true;
+  resetBtn.style.display = 'inline-block';
 
   // Create radio buttons
   const positiveChoice = document.createElement('div');
