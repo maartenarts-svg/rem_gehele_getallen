@@ -120,7 +120,7 @@ button:disabled {
 <h1>Level 2 - Herschrijf de opgave</h1>
 <div id="LVL22exercise"></div>
 <div id="LVL22answerSection">
-  <input type="text" id="LVL22answerInput" placeholder="?" />
+  <input type="text" id="LVL22answerInput" placeholder="?" autocomplete="off" />
 </div>
 <button id="LVL22checkBtn" disabled>Controleer</button>
 <div id="LVL22feedback"></div>
@@ -315,21 +315,21 @@ function showExercise() {
     // Check for errors in order of priority
     if(parsed.error === 'parentheses') {
       answerInput.style.backgroundColor = '#ffcccc';
-      fb.innerHTML = 'Na het herschrijven kunnen er geen haakjes meer staan.';
+      fb.innerHTML = `Na het herschrijven kunnen er geen haakjes meer staan.<br>De juiste oplossing is: ${ex.correctAnswer}`;
       fb.style.display = 'block';
     } else if(parsed.error === 'just_number') {
       answerInput.style.backgroundColor = '#ffcccc';
-      fb.innerHTML = 'De opgave is enkel herschrijven. Je rekent nog niets uit.';
+      fb.innerHTML = `De opgave is enkel herschrijven. Je rekent nog niets uit.<br>De juiste oplossing is: ${ex.correctAnswer}`;
       fb.style.display = 'block';
     } else if(parsed.error === 'invalid_format') {
       answerInput.style.backgroundColor = '#ffcccc';
-      fb.innerHTML = `Het juiste antwoord is ${ex.correctAnswer}.`;
+      fb.innerHTML = `De juiste oplossing is: ${ex.correctAnswer}`;
       fb.style.display = 'block';
     } else {
       // Check if numbers are changed
       if(parsed.abs1 !== ex.correctAbsA || parsed.abs2 !== ex.correctAbsB) {
         answerInput.style.backgroundColor = '#ffcccc';
-        fb.innerHTML = 'Je verandert de getallen. Check je antwoord voor je op controleren drukt.';
+        fb.innerHTML = `Je verandert de getallen. Check je antwoord voor je op controleren drukt.<br>De juiste oplossing is: ${ex.correctAnswer}`;
         fb.style.display = 'block';
       } else {
         // Numbers are correct, check the rest
@@ -386,10 +386,8 @@ function showExercise() {
             }
           }
           
-          // If no feedback was set (shouldn't happen, but safety check)
-          if(!feedbackText) {
-            feedbackText = `Het juiste antwoord is ${ex.correctAnswer}.`;
-          }
+          // Add the correct solution at the end
+          feedbackText += `<br>De juiste oplossing is: ${ex.correctAnswer}`;
           
           fb.innerHTML = feedbackText;
           fb.style.display = 'block';
