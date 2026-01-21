@@ -158,7 +158,7 @@ h1 {
 
 button {
   padding: 12px 25px;
-  margin: 10px 5px;
+  margin: 0;
   cursor: pointer;
   border-radius: 12px;
   border: none;
@@ -228,7 +228,11 @@ button:disabled {
 <div id="LVL12answerSection">
   <input type="text" id="LVL12answerInput" placeholder="?" autocomplete="off" />
 </div>
-<button id="LVL12showArrowBtn">Pijlenvoorstelling</button>
+
+<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0;">
+  <button id="LVL12showArrowBtn">Pijlenvoorstelling</button>
+  <button id="LVL12checkBtn" disabled>Controleer</button>
+</div>
 
 <div id="LVL12arrowSection">
   <div id="LVL12arrowChoices"></div>
@@ -236,7 +240,6 @@ button:disabled {
   <button id="LVL12resetBtn" disabled>Reset pijlen</button>
 </div>
 
-<button id="LVL12checkBtn" disabled>Controleer</button>
 <div id="LVL12feedback"></div>
 <button id="LVL12nextBtn" style="display:none;">Volgende oefening</button>
 
@@ -391,6 +394,7 @@ function showExercise() {
   showArrowBtn.style.display = 'inline-block';
   showArrowBtn.disabled = false;
   resetBtn.disabled = true;
+  resetBtn.style.display = 'inline-block';
 
   // Enable check button when input has value
   answerInput.oninput = () => {
