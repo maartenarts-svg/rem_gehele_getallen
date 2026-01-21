@@ -209,7 +209,7 @@ h1 {
 
 button {
   padding: 12px 25px;
-  margin: 10px 5px;
+  margin: 0;
   cursor: pointer;
   border-radius: 12px;
   border: none;
@@ -293,7 +293,10 @@ button:disabled {
   <input type="text" class="input-field" id="LVL25answerInput" placeholder="?" autocomplete="off" />
 </div>
 
-<button id="LVL25showArrowBtn">Pijlenvoorstelling</button>
+<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0;">
+  <button id="LVL25showArrowBtn">Pijlenvoorstelling</button>
+  <button id="LVL25checkBtn" disabled>Controleer</button>
+</div>
 
 <div id="LVL25arrowSection">
   <div id="LVL25arrowChoices"></div>
@@ -301,7 +304,6 @@ button:disabled {
   <button id="LVL25resetBtn" disabled>Reset pijlen</button>
 </div>
 
-<button id="LVL25checkBtn" disabled>Controleer</button>
 <div id="LVL25feedback"></div>
 <button id="LVL25nextBtn" style="display:none;">Volgende oefening</button>
 
@@ -520,6 +522,7 @@ function showExercise() {
   showArrowBtn.style.display = 'inline-block';
   showArrowBtn.disabled = false;
   resetBtn.disabled = true;
+  resetBtn.style.display = 'inline-block';
 
   function updateCheckButton() {
     const hasRewrite = rewriteInput.value.trim() !== '';
