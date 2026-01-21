@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 6 - Moet je de opgave herschrijven of niet</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL26exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL26choices {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.choice-button {
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  padding: 20px 40px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.choice-button:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.choice-button.selected {
+  border: 3px solid #007BFF;
+  background-color: #e0f0ff;
+}
+
+#LVL26feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 10px 5px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL26nextBtn {
+  background-color: #28a745;
+}
+
+#LVL26nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL26progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL26progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 6 - Moet je de opgave herschrijven of niet</h1>
+<div id="LVL26exercise"></div>
+<div id="LVL26choices">
+  <button class="choice-button" id="LVL26herschrijvenBtn">Herschrijven</button>
+  <button class="choice-button" id="LVL26nietHerschrijvenBtn">Niet herschrijven</button>
+</div>
+<button id="LVL26checkBtn" disabled>Controleer</button>
+<div id="LVL26feedback"></div>
+<button id="LVL26nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL26progressContainer">
+  <div id="LVL26progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let selectedChoice = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL26progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+  let easyCount = 0; // Count of "easy" exercises for type 1-12
+  let type21Count = 0; // Count of type 2-1 exercises (need rewriting)
+
+  // We want approximately 50/50 split
+  const targetType21 = Math.floor(num / 2);
+
+  while(list.length < num) {
+    // Decide exercise type
+    let needsRewriting;
+    if(type21Count < targetType21 && (list.length - type21Count) < (num - targetType21)) {
+      // Need more type 2-1, but also check if we have room for type 1-12
+      needsRewriting = Math.random() < 0.5;
+    } else if(type21Count >= targetType21) {
+      needsRewriting = false; // We have enough type 2-1
+    } else {
+      needsRewriting = true; // We need more type 2-1
+    }
+
+    let a, b, op, key;
+
+    if(needsRewriting) {
+      // Type 2-1: second number is negative
+      const firstNegative = Math.random() < 0.5;
+      a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      b = -rand(5, 20); // Always negative
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      op = Math.random() < 0.5 ? '+' : '-';
+    } else {
+      // Type 1-12: second number is positive
+      const firstNegative = Math.random() < 0.5;
+      a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      b = rand(5, 20); // Always positive
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      op = Math.random() < 0.5 ? '+' : '-';
+      
+      const result = op === '+' ? a + b : a - b;
+      const isEasy = (a > 0 && result > 0);
+      
+      // If we already have 3 easy exercises, skip this one if it's easy
+      if(isEasy && easyCount >= 3) {
+        continue;
+      }
+      
+      if(isEasy) {
+        easyCount++;
+      }
+    }
+    
+    key = `${a}${op}${b}`;
+    if(!set.has(key)) {
+      set.add(key);
+      
+      if(needsRewriting) {
+        type21Count++;
+      }
+      
+      list.push({
+        a,
+        b,
+        op,
+        needsRewriting
+      });
+    }
+  }
+  
+  // Shuffle the list
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL26exercise');
+    const choicesDiv = document.getElementById('LVL26choices');
+    const fb = document.getElementById('LVL26feedback');
+    const checkBtn = document.getElementById('LVL26checkBtn');
+    const nextBtn = document.getElementById('LVL26nextBtn');
+
+    choicesDiv.style.display = 'none';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL26backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL26backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  selectedChoice = null;
+
+  // Format exercise
+  let exerciseText;
+  if(ex.needsRewriting) {
+    // Type 2-1: show with parentheses
+    const bFormatted = ex.b < 0 ? `(${ex.b})` : ex.b;
+    exerciseText = `${ex.a} ${ex.op} ${bFormatted}`;
+  } else {
+    // Type 1-12: no parentheses needed
+    exerciseText = `${ex.a} ${ex.op} ${ex.b}`;
+  }
+  
+  document.getElementById('LVL26exercise').innerHTML = exerciseText;
+  
+  const fb = document.getElementById('LVL26feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL26checkBtn');
+  const nextBtn = document.getElementById('LVL26nextBtn');
+  const herschrijvenBtn = document.getElementById('LVL26herschrijvenBtn');
+  const nietHerschrijvenBtn = document.getElementById('LVL26nietHerschrijvenBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+  
+  // Reset button states
+  herschrijvenBtn.classList.remove('selected');
+  nietHerschrijvenBtn.classList.remove('selected');
+  herschrijvenBtn.style.pointerEvents = 'auto';
+  nietHerschrijvenBtn.style.pointerEvents = 'auto';
+  herschrijvenBtn.style.backgroundColor = '';
+  nietHerschrijvenBtn.style.backgroundColor = '';
+
+  herschrijvenBtn.onclick = () => {
+    selectedChoice = 'herschrijven';
+    herschrijvenBtn.classList.add('selected');
+    nietHerschrijvenBtn.classList.remove('selected');
+    checkBtn.disabled = false;
+  };
+
+  nietHerschrijvenBtn.onclick = () => {
+    selectedChoice = 'niet_herschrijven';
+    nietHerschrijvenBtn.classList.add('selected');
+    herschrijvenBtn.classList.remove('selected');
+    checkBtn.disabled = false;
+  };
+
+  checkBtn.onclick = () => {
+    herschrijvenBtn.style.pointerEvents = 'none';
+    nietHerschrijvenBtn.style.pointerEvents = 'none';
+
+    const fb = document.getElementById('LVL26feedback');
+    
+    const isCorrect = (ex.needsRewriting && selectedChoice === 'herschrijven') ||
+                      (!ex.needsRewriting && selectedChoice === 'niet_herschrijven');
+
+    if(isCorrect) {
+      if(selectedChoice === 'herschrijven') {
+        herschrijvenBtn.style.backgroundColor = 'lightgreen';
+      } else {
+        nietHerschrijvenBtn.style.backgroundColor = 'lightgreen';
+      }
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } else {
+      let feedbackText = '';
+      
+      if(ex.needsRewriting && selectedChoice === 'niet_herschrijven') {
+        // Type 2-1 exercise but chose not to rewrite
+        nietHerschrijvenBtn.style.backgroundColor = '#ffcccc';
+        herschrijvenBtn.style.backgroundColor = 'lightgreen';
+        
+        if(ex.op === '+') {
+          feedbackText = 'Dit is een optelling met een negatief getal. Dat moet je herschrijven naar een aftrekking met een positief getal.';
+        } else {
+          feedbackText = 'Dit is een aftrekking met een negatief getal. Dat moet je herschrijven naar een optelling met een positief getal.';
+        }
+      } else if(!ex.needsRewriting && selectedChoice === 'herschrijven') {
+        // Type 1-12 exercise but chose to rewrite
+        herschrijvenBtn.style.backgroundColor = '#ffcccc';
+        nietHerschrijvenBtn.style.backgroundColor = 'lightgreen';
+        
+        if(ex.op === '+') {
+          feedbackText = 'Dit is een optelling met een positief getal. Dat kun je, eventueel met behulp van een pijlenschema, onmiddellijk uitrekenen.';
+        } else {
+          feedbackText = 'Dit is een aftrekking met een positief getal. Dat kun je, eventueel met behulp van een pijlenschema, onmiddellijk uitrekenen.';
+        }
+      }
+      
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL26nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
