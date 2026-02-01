@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 3-5 - Duid aan wat je best eerst doet</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL35exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL35choices {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.choice-button {
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  padding: 15px 30px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 16px;
+  font-weight: bold;
+  min-width: 400px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.choice-button:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.choice-button.selected {
+  border: 3px solid #007BFF;
+  background-color: #e0f0ff;
+}
+
+#LVL35feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL35nextBtn {
+  background-color: #28a745;
+}
+
+#LVL35nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL35progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL35progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 5 - Duid aan wat je best eerst doet</h1>
+<div id="LVL35exercise"></div>
+<div id="LVL35choices">
+  <button class="choice-button" id="LVL35choice1">Pijlenvoorstelling maken</button>
+  <button class="choice-button" id="LVL35choice2">Herschrijven</button>
+  <button class="choice-button" id="LVL35choice3">Aantal negatieve getallen tellen</button>
+</div>
+<button id="LVL35checkBtn" disabled>Controleer</button>
+<div id="LVL35feedback"></div>
+<button id="LVL35nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL35progressContainer">
+  <div id="LVL35progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let selectedChoice = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL35progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+  
+  let type1Count = 0; // Addition/subtraction with positive second number
+  let type2Count = 0; // Addition/subtraction with negative second number
+  let type3Count = 0; // Multiplication/division
+  
+  const targetPerType = Math.floor(num / 3);
+
+  while(list.length < num) {
+    let type;
+    
+    // Decide type to maintain balance
+    if(type1Count < targetPerType && type2Count < targetPerType && type3Count < targetPerType) {
+      type = rand(1, 3);
+    } else if(type1Count >= targetPerType && type2Count < targetPerType && type3Count < targetPerType) {
+      type = Math.random() < 0.5 ? 2 : 3;
+    } else if(type2Count >= targetPerType && type1Count < targetPerType && type3Count < targetPerType) {
+      type = Math.random() < 0.5 ? 1 : 3;
+    } else if(type3Count >= targetPerType && type1Count < targetPerType && type2Count < targetPerType) {
+      type = Math.random() < 0.5 ? 1 : 2;
+    } else if(type1Count >= targetPerType && type2Count >= targetPerType) {
+      type = 3;
+    } else if(type1Count >= targetPerType && type3Count >= targetPerType) {
+      type = 2;
+    } else if(type2Count >= targetPerType && type3Count >= targetPerType) {
+      type = 1;
+    } else {
+      type = rand(1, 3);
+    }
+
+    let exercise = null;
+    let key = '';
+
+    if(type === 1) {
+      // Type 1: Addition/subtraction with positive second number
+      // First number can be negative, or result must be negative
+      const firstNegative = Math.random() < 0.5;
+      const a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      const b = rand(5, 20); // Always positive
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      const op = Math.random() < 0.5 ? '+' : '-';
+      const result = op === '+' ? a + b : a - b;
+      
+      // Must have negative first number OR negative result (not both positive with positive result)
+      if(a > 0 && result > 0) continue;
+      
+      key = `${a}${op}${b}`;
+      
+      if(!set.has(key)) {
+        set.add(key);
+        type1Count++;
+        
+        exercise = {
+          display: `${a} ${op} ${b}`,
+          type: 1,
+          correctChoice: 'arrow',
+          opType: op === '+' ? 'optelling' : 'aftrekking',
+          feedbackDesc: `een ${op === '+' ? 'optelling' : 'aftrekking'} met een positief getal`,
+          feedbackAction: 'maak je best eerst een pijlenschema'
+        };
+      }
+    } else if(type === 2) {
+      // Type 2: Addition/subtraction with negative second number
+      const firstNegative = Math.random() < 0.5;
+      const a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      const b = -rand(5, 20); // Always negative
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      const op = Math.random() < 0.5 ? '+' : '-';
+      
+      key = `${a}${op}${b}`;
+      
+      if(!set.has(key)) {
+        set.add(key);
+        type2Count++;
+        
+        const bFormatted = `(${b})`;
+        const rewriteOp = op === '+' ? 'aftrekking' : 'optelling';
+        
+        exercise = {
+          display: `${a} ${op} ${bFormatted}`,
+          type: 2,
+          correctChoice: 'rewrite',
+          opType: op === '+' ? 'optelling' : 'aftrekking',
+          feedbackDesc: `een ${op === '+' ? 'optelling' : 'aftrekking'} met een negatief getal`,
+          feedbackAction: `herschrijf je eerst naar een ${rewriteOp} met een positief getal`
+        };
+      }
+    } else if(type === 3) {
+      // Type 3: Multiplication or division
+      const isMult = Math.random() < 0.5;
+      
+      if(isMult) {
+        const absA = rand(1, 10);
+        const absB = rand(1, 20);
+        const signA = Math.random() < 0.5 ? -1 : 1;
+        const signB = Math.random() < 0.5 ? -1 : 1;
+        
+        let a = signA * absA;
+        let b = signB * absB;
+        
+        // At least one must be negative
+        if(a > 0 && b > 0) continue;
+        
+        // Randomize order
+        if(Math.random() < 0.5) {
+          [a, b] = [b, a];
+        }
+        
+        const bFormatted = b < 0 ? `(${b})` : b.toString();
+        key = `${a}*${b}`;
+        
+        if(!set.has(key)) {
+          set.add(key);
+          type3Count++;
+          
+          exercise = {
+            display: `${a} · ${bFormatted}`,
+            type: 3,
+            correctChoice: 'count',
+            opType: 'vermenigvuldiging',
+            feedbackDesc: 'een vermenigvuldiging met negatieve getallen',
+            feedbackAction: 'tel je eerst het aantal negatieve getallen'
+          };
+        }
+      } else {
+        // Division
+        const absA = rand(1, 10);
+        const absB = rand(1, 20);
+        const signA = Math.random() < 0.5 ? -1 : 1;
+        const signB = Math.random() < 0.5 ? -1 : 1;
+        
+        const factor1 = signA * absA;
+        const factor2 = signB * absB;
+        
+        // At least one must be negative
+        if(factor1 > 0 && factor2 > 0) continue;
+        
+        const dividend = factor1 * factor2;
+        const divisor = Math.random() < 0.5 ? factor1 : factor2;
+        
+        const divisorFormatted = divisor < 0 ? `(${divisor})` : divisor.toString();
+        key = `${dividend}/${divisor}`;
+        
+        if(!set.has(key)) {
+          set.add(key);
+          type3Count++;
+          
+          exercise = {
+            display: `${dividend} : ${divisorFormatted}`,
+            type: 3,
+            correctChoice: 'count',
+            opType: 'deling',
+            feedbackDesc: 'een deling met negatieve getallen',
+            feedbackAction: 'tel je eerst het aantal negatieve getallen'
+          };
+        }
+      }
+    }
+    
+    if(exercise) {
+      list.push(exercise);
+    }
+  }
+  
+  // Shuffle
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL35exercise');
+    const choicesDiv = document.getElementById('LVL35choices');
+    const fb = document.getElementById('LVL35feedback');
+    const checkBtn = document.getElementById('LVL35checkBtn');
+    const nextBtn = document.getElementById('LVL35nextBtn');
+
+    choicesDiv.style.display = 'none';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL35backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL35backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  selectedChoice = null;
+
+  document.getElementById('LVL35exercise').innerHTML = ex.display;
+  
+  const fb = document.getElementById('LVL35feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL35checkBtn');
+  const nextBtn = document.getElementById('LVL35nextBtn');
+  const choice1 = document.getElementById('LVL35choice1');
+  const choice2 = document.getElementById('LVL35choice2');
+  const choice3 = document.getElementById('LVL35choice3');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+
+  // Reset button states
+  [choice1, choice2, choice3].forEach(btn => {
+    btn.classList.remove('selected');
+    btn.style.pointerEvents = 'auto';
+    btn.style.backgroundColor = '';
+  });
+
+  choice1.onclick = () => {
+    selectedChoice = 'arrow';
+    choice1.classList.add('selected');
+    choice2.classList.remove('selected');
+    choice3.classList.remove('selected');
+    checkBtn.disabled = false;
+  };
+
+  choice2.onclick = () => {
+    selectedChoice = 'rewrite';
+    choice2.classList.add('selected');
+    choice1.classList.remove('selected');
+    choice3.classList.remove('selected');
+    checkBtn.disabled = false;
+  };
+
+  choice3.onclick = () => {
+    selectedChoice = 'count';
+    choice3.classList.add('selected');
+    choice1.classList.remove('selected');
+    choice2.classList.remove('selected');
+    checkBtn.disabled = false;
+  };
+
+  checkBtn.onclick = () => {
+    [choice1, choice2, choice3].forEach(btn => {
+      btn.style.pointerEvents = 'none';
+    });
+
+    const fb = document.getElementById('LVL35feedback');
+    const isCorrect = (selectedChoice === ex.correctChoice);
+
+    if(isCorrect) {
+      if(selectedChoice === 'arrow') {
+        choice1.style.backgroundColor = 'lightgreen';
+      } else if(selectedChoice === 'rewrite') {
+        choice2.style.backgroundColor = 'lightgreen';
+      } else {
+        choice3.style.backgroundColor = 'lightgreen';
+      }
+      
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } else {
+      // Mark selected as wrong
+      if(selectedChoice === 'arrow') {
+        choice1.style.backgroundColor = '#ffcccc';
+      } else if(selectedChoice === 'rewrite') {
+        choice2.style.backgroundColor = '#ffcccc';
+      } else {
+        choice3.style.backgroundColor = '#ffcccc';
+      }
+      
+      // Mark correct as green
+      if(ex.correctChoice === 'arrow') {
+        choice1.style.backgroundColor = 'lightgreen';
+      } else if(ex.correctChoice === 'rewrite') {
+        choice2.style.backgroundColor = 'lightgreen';
+      } else {
+        choice3.style.backgroundColor = 'lightgreen';
+      }
+      
+      const feedbackText = `Dit is ${ex.feedbackDesc}. Bij dit soort oefening ${ex.feedbackAction}.`;
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL35nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
