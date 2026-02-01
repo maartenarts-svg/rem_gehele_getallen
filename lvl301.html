@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 3-1 - Duid het teken van de uitkomst aan</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL31exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL31choices {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.radio-choice {
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  padding: 20px 40px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.radio-choice:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.radio-choice.selected {
+  border: 3px solid #007BFF;
+  background-color: #e0f0ff;
+}
+
+#LVL31feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL31nextBtn {
+  background-color: #28a745;
+}
+
+#LVL31nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL31progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL31progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 1 - Duid het teken van de uitkomst aan</h1>
+<div id="LVL31exercise"></div>
+<div id="LVL31choices"></div>
+<button id="LVL31checkBtn" disabled>Controleer</button>
+<div id="LVL31feedback"></div>
+<button id="LVL31nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL31progressContainer">
+  <div id="LVL31progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let selectedAnswer = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL31progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+  let bothPositiveCount = 0;
+  let multiplicationCount = 0;
+  
+  const targetMultiplication = Math.floor(num / 2);
+
+  while(list.length < num) {
+    // Decide if multiplication or division
+    let isMultiplication;
+    if(multiplicationCount < targetMultiplication && (list.length - multiplicationCount) < (num - targetMultiplication)) {
+      isMultiplication = Math.random() < 0.5;
+    } else if(multiplicationCount >= targetMultiplication) {
+      isMultiplication = false;
+    } else {
+      isMultiplication = true;
+    }
+
+    let a, b, displayA, displayB, op, result, key;
+
+    if(isMultiplication) {
+      // Generate two numbers for multiplication
+      const absA = rand(1, 10);
+      const absB = rand(1, 20);
+      const signA = Math.random() < 0.5 ? -1 : 1;
+      const signB = Math.random() < 0.5 ? -1 : 1;
+      
+      a = signA * absA;
+      b = signB * absB;
+      
+      // Randomize order
+      if(Math.random() < 0.5) {
+        [a, b] = [b, a];
+      }
+      
+      op = '·';
+      result = a * b;
+      
+      // Format display with parentheses if second number is negative
+      displayA = a.toString();
+      displayB = b < 0 ? `(${b})` : b.toString();
+      
+      key = `${a}*${b}`;
+      
+      // Check if both positive
+      const isBothPositive = (a > 0 && b > 0);
+      if(isBothPositive && bothPositiveCount >= 2) {
+        continue;
+      }
+      
+      if(!set.has(key)) {
+        set.add(key);
+        if(isBothPositive) bothPositiveCount++;
+        multiplicationCount++;
+        
+        const negCount = (a < 0 ? 1 : 0) + (b < 0 ? 1 : 0);
+        list.push({
+          displayA,
+          displayB,
+          op,
+          result,
+          sign: result > 0 ? 'positive' : 'negative',
+          opName: 'vermenigvuldiging',
+          negCount,
+          a,
+          b
+        });
+      }
+    } else {
+      // Generate division
+      const absA = rand(1, 10);
+      const absB = rand(1, 20);
+      const signA = Math.random() < 0.5 ? -1 : 1;
+      const signB = Math.random() < 0.5 ? -1 : 1;
+      
+      const factor1 = signA * absA;
+      const factor2 = signB * absB;
+      
+      // Dividend is the product
+      const dividend = factor1 * factor2;
+      
+      // Divisor is one of the two factors
+      const divisor = Math.random() < 0.5 ? factor1 : factor2;
+      
+      result = dividend / divisor;
+      
+      a = dividend;
+      b = divisor;
+      op = ':';
+      
+      // Format display
+      displayA = a.toString();
+      displayB = b < 0 ? `(${b})` : b.toString();
+      
+      key = `${a}/${b}`;
+      
+      // Check if both positive
+      const isBothPositive = (a > 0 && b > 0);
+      if(isBothPositive && bothPositiveCount >= 2) {
+        continue;
+      }
+      
+      if(!set.has(key)) {
+        set.add(key);
+        if(isBothPositive) bothPositiveCount++;
+        
+        const negCount = (a < 0 ? 1 : 0) + (b < 0 ? 1 : 0);
+        list.push({
+          displayA,
+          displayB,
+          op,
+          result,
+          sign: result > 0 ? 'positive' : 'negative',
+          opName: 'deling',
+          negCount,
+          a,
+          b
+        });
+      }
+    }
+  }
+  
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL31exercise');
+    const choicesDiv = document.getElementById('LVL31choices');
+    const fb = document.getElementById('LVL31feedback');
+    const checkBtn = document.getElementById('LVL31checkBtn');
+    const nextBtn = document.getElementById('LVL31nextBtn');
+
+    choicesDiv.innerHTML = '';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL31backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL31backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  selectedAnswer = null;
+
+  document.getElementById('LVL31exercise').innerHTML = `${ex.displayA} ${ex.op} ${ex.displayB}`;
+  
+  const fb = document.getElementById('LVL31feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const choicesDiv = document.getElementById('LVL31choices');
+  choicesDiv.innerHTML = '';
+
+  const checkBtn = document.getElementById('LVL31checkBtn');
+  const nextBtn = document.getElementById('LVL31nextBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+
+  // Create radio buttons
+  const positiveChoice = document.createElement('div');
+  positiveChoice.className = 'radio-choice';
+  positiveChoice.innerHTML = '+ (positief)';
+  positiveChoice.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 0;
+    positiveChoice.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  const negativeChoice = document.createElement('div');
+  negativeChoice.className = 'radio-choice';
+  negativeChoice.innerHTML = '− (negatief)';
+  negativeChoice.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 1;
+    negativeChoice.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  choicesDiv.appendChild(positiveChoice);
+  choicesDiv.appendChild(negativeChoice);
+
+  checkBtn.onclick = () => {
+    const children = choicesDiv.children;
+    const userAnswer = selectedAnswer === 0 ? 'positive' : 'negative';
+    
+    for(let i = 0; i < children.length; i++) {
+      children[i].style.pointerEvents = 'none';
+    }
+
+    const fb = document.getElementById('LVL31feedback');
+    const isCorrectAnswer = (userAnswer === ex.sign);
+
+    if(isCorrectAnswer) {
+      children[selectedAnswer].style.backgroundColor = 'lightgreen';
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } else {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.sign === 'positive' ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      // Generate feedback
+      let feedbackText = `Bij een ${ex.opName} tel je het aantal negatieve getallen. `;
+      
+      if(ex.negCount === 0) {
+        feedbackText += 'Hier zijn er geen negatieve getallen. Dat is een even aantal negatieve getallen. De uitkomst is dan positief.';
+      } else if(ex.negCount === 1) {
+        feedbackText += 'Hier is er één negatief getal. Dat is een oneven aantal negatieve getallen. De uitkomst is dan negatief.';
+      } else if(ex.negCount === 2) {
+        feedbackText += 'Hier zijn er twee negatieve getallen. Dat is een even aantal negatieve getallen. De uitkomst is dan positief.';
+      }
+      
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL31nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
