@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 3-2 - Duid het teken van de uitkomst aan</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL32exercise {
+  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL32choices {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.radio-choice {
+  border: 2px solid #ccc;
+  border-radius: 15px;
+  padding: 20px 40px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.radio-choice:hover {
+  background-color: #e0f0ff;
+  transform: translateY(-2px);
+}
+
+.radio-choice.selected {
+  border: 3px solid #007BFF;
+  background-color: #e0f0ff;
+}
+
+#LVL32feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 12px 25px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL32nextBtn {
+  background-color: #28a745;
+}
+
+#LVL32nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL32progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL32progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 2 - Duid het teken van de uitkomst aan</h1>
+<div id="LVL32exercise"></div>
+<div id="LVL32choices"></div>
+<button id="LVL32checkBtn" disabled>Controleer</button>
+<div id="LVL32feedback"></div>
+<button id="LVL32nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL32progressContainer">
+  <div id="LVL32progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let selectedAnswer = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL32progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+  let allPositiveCount = 0;
+
+  while(list.length < num) {
+    // Random number of factors (3-7)
+    const numFactors = rand(3, 7);
+    
+    const factors = [];
+    let negCount = 0;
+    
+    for(let i = 0; i < numFactors; i++) {
+      const abs = rand(10, 100);
+      const sign = Math.random() < 0.5 ? -1 : 1;
+      const value = sign * abs;
+      factors.push(value);
+      if(value < 0) negCount++;
+    }
+    
+    // Check if all positive
+    const isAllPositive = (negCount === 0);
+    if(isAllPositive && allPositiveCount >= 2) {
+      continue;
+    }
+    
+    // Create key for uniqueness
+    const key = factors.join('*');
+    
+    if(!set.has(key)) {
+      set.add(key);
+      if(isAllPositive) allPositiveCount++;
+      
+      // Calculate result sign
+      const sign = negCount % 2 === 0 ? 'positive' : 'negative';
+      
+      // Format display
+      let display = factors[0].toString();
+      for(let i = 1; i < factors.length; i++) {
+        display += ' · ';
+        if(factors[i] < 0) {
+          display += `(${factors[i]})`;
+        } else {
+          display += factors[i];
+        }
+      }
+      
+      list.push({
+        display,
+        factors,
+        negCount,
+        sign
+      });
+    }
+  }
+  
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL32exercise');
+    const choicesDiv = document.getElementById('LVL32choices');
+    const fb = document.getElementById('LVL32feedback');
+    const checkBtn = document.getElementById('LVL32checkBtn');
+    const nextBtn = document.getElementById('LVL32nextBtn');
+
+    choicesDiv.innerHTML = '';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL32backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL32backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  selectedAnswer = null;
+
+  document.getElementById('LVL32exercise').innerHTML = ex.display;
+  
+  const fb = document.getElementById('LVL32feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const choicesDiv = document.getElementById('LVL32choices');
+  choicesDiv.innerHTML = '';
+
+  const checkBtn = document.getElementById('LVL32checkBtn');
+  const nextBtn = document.getElementById('LVL32nextBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+
+  // Create radio buttons
+  const positiveChoice = document.createElement('div');
+  positiveChoice.className = 'radio-choice';
+  positiveChoice.innerHTML = '+ (positief)';
+  positiveChoice.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 0;
+    positiveChoice.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  const negativeChoice = document.createElement('div');
+  negativeChoice.className = 'radio-choice';
+  negativeChoice.innerHTML = '− (negatief)';
+  negativeChoice.onclick = () => {
+    if(selectedAnswer !== null) {
+      choicesDiv.children[selectedAnswer].classList.remove('selected');
+    }
+    selectedAnswer = 1;
+    negativeChoice.classList.add('selected');
+    checkBtn.disabled = false;
+  };
+
+  choicesDiv.appendChild(positiveChoice);
+  choicesDiv.appendChild(negativeChoice);
+
+  checkBtn.onclick = () => {
+    const children = choicesDiv.children;
+    const userAnswer = selectedAnswer === 0 ? 'positive' : 'negative';
+    
+    for(let i = 0; i < children.length; i++) {
+      children[i].style.pointerEvents = 'none';
+    }
+
+    const fb = document.getElementById('LVL32feedback');
+    const isCorrectAnswer = (userAnswer === ex.sign);
+
+    if(isCorrectAnswer) {
+      children[selectedAnswer].style.backgroundColor = 'lightgreen';
+      fb.innerText = '✅ Correct!';
+      fb.style.display = 'block';
+      xp += 1;
+    } else {
+      children[selectedAnswer].style.backgroundColor = '#ffcccc';
+      const correctIndex = ex.sign === 'positive' ? 0 : 1;
+      children[correctIndex].style.backgroundColor = 'lightgreen';
+      
+      // Generate feedback
+      let feedbackText = 'Bij een vermenigvuldiging tel je het aantal negatieve getallen. ';
+      
+      if(ex.negCount === 0) {
+        feedbackText += 'Hier zijn er geen negatieve getallen. Dat is een even aantal negatieve getallen. De uitkomst is dan positief.';
+      } else if(ex.negCount === 1) {
+        feedbackText += 'Hier is er één negatief getal. Dat is een oneven aantal negatieve getallen. De uitkomst is dan negatief.';
+      } else {
+        // For 2 or more negatives
+        const numberWords = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven'];
+        feedbackText += `Hier zijn er ${numberWords[ex.negCount]} negatieve getallen. Dat is een ${ex.negCount % 2 === 0 ? 'even' : 'oneven'} aantal negatieve getallen. De uitkomst is dan ${ex.negCount % 2 === 0 ? 'positief' : 'negatief'}.`;
+      }
+      
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL32nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
