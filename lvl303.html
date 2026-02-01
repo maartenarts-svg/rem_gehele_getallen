@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 7 - Herschrijf indien nodig en reken uit</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+.subtitle {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 25px;
+  font-style: italic;
+}
+
+#LVL27exercise {
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.equals-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.equals-sign {
+  font-size: 32px;
+  color: #2c3e50;
+  width: 30px;
+}
+
+.input-field {
+  width: 200px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #007BFF;
+}
+
+#LVL27step2 {
+  display: none;
+}
+
+#LVL27toggleBtn {
+  background-color: #17a2b8;
+  font-size: 16px;
+  padding: 12px 25px;
+  display: inline-block;
+  min-width: 60px;
+}
+
+#LVL27toggleBtn:hover:enabled {
+  background-color: #117a8b;
+}
+
+#LVL27arrowSection {
+  display: none;
+  margin: 20px auto;
+}
+
+#LVL27arrowChoices {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.arrow {
+  width: 120px;
+  height: 20px;
+  position: relative;
+  cursor: grab;
+}
+
+.arrow.fixed {
+  cursor: default;
+}
+
+.arrow .line {
+  height: 2px;
+  position: absolute;
+  top: 9px;
+}
+
+.arrow .tip {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  position: absolute;
+  top: 7px;
+}
+
+.arrow .dot {
+  width: 8px;
+  height: 8px;
+  background: black;
+  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+}
+
+#LVL27target {
+  width: 360px;
+  height: 120px;
+  margin: 0 auto 20px auto;
+  position: relative;
+}
+
+#LVL27target .axis {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: black;
+}
+
+#LVL27target .zero-line {
+  position: absolute;
+  top: 70px;
+  width: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 20px;
+  background: black;
+}
+
+#LVL27target .zero {
+  position: absolute;
+  top: 95px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+}
+
+#LVL27target .target-dot {
+  width: 8px;
+  height: 8px;
+  background: black;
+  border-radius: 50%;
+  position: absolute;
+}
+
+#LVL27feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL27popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  z-index: 2000;
+  max-width: 400px;
+}
+
+#LVL27popupOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1999;
+}
+
+#LVL27popup .popup-message {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+#LVL27popup button {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#LVL27popup button:hover {
+  background-color: #0056b3;
+}
+
+button {
+  padding: 12px 25px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL27showArrowBtn {
+  background-color: #6c757d;
+}
+
+#LVL27showArrowBtn:hover:enabled {
+  background-color: #5a6268;
+}
+
+#LVL27resetBtn {
+  background-color: #ffc107;
+}
+
+#LVL27resetBtn:hover:enabled {
+  background-color: #e0a800;
+}
+
+#LVL27nextBtn {
+  background-color: #28a745;
+}
+
+#LVL27nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL27progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL27progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<div id="LVL27popupOverlay"></div>
+<div id="LVL27popup">
+  <div class="popup-message">Reken verder uit.</div>
+  <button id="LVL27popupOkBtn">OK</button>
+</div>
+
+<h1>Level 7 - Herschrijf indien nodig en reken uit</h1>
+<div class="subtitle">Druk op de + voor een extra stap.</div>
+<div id="LVL27exercise"></div>
+
+<div class="equals-row" id="LVL27step1">
+  <span class="equals-sign">=</span>
+  <input type="text" class="input-field" id="LVL27input1" placeholder="?" autocomplete="off" />
+</div>
+
+<div class="equals-row" id="LVL27step2">
+  <span class="equals-sign">=</span>
+  <input type="text" class="input-field" id="LVL27input2" placeholder="?" autocomplete="off" />
+</div>
+
+<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0;">
+  <button id="LVL27toggleBtn">+</button>
+  <button id="LVL27showArrowBtn">Pijlenvoorstelling</button>
+  <button id="LVL27checkBtn" disabled>Controleer</button>
+</div>
+
+<div id="LVL27arrowSection">
+  <div id="LVL27arrowChoices"></div>
+  <div id="LVL27target"></div>
+  <button id="LVL27resetBtn" disabled>Reset pijlen</button>
+</div>
+
+<div id="LVL27feedback"></div>
+<button id="LVL27nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL27progressContainer">
+  <div id="LVL27progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+let arrowShown = false;
+let step2Visible = false;
+
+const axisLength = 360;
+const longArrowLength = axisLength / 4;
+const shortArrowLength = axisLength / 8;
+
+let selectedArrows = [];
+let extraDot = null;
+let firstDot = null;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL27progressBar').style.width = percentage + "%";
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+  let easyCount = 0;
+  let type25Count = 0;
+
+  const targetType25 = Math.floor(num / 2);
+
+  while(list.length < num) {
+    let needsRewriting;
+    if(type25Count < targetType25 && (list.length - type25Count) < (num - targetType25)) {
+      needsRewriting = Math.random() < 0.5;
+    } else if(type25Count >= targetType25) {
+      needsRewriting = false;
+    } else {
+      needsRewriting = true;
+    }
+
+    let a, b, op, key;
+
+    if(needsRewriting) {
+      // Type 2-5: second number is negative
+      const firstNegative = Math.random() < 0.5;
+      a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      b = -rand(5, 20);
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      op = Math.random() < 0.5 ? '+' : '-';
+      
+      key = `${a}${op}${b}`;
+      if(!set.has(key)) {
+        set.add(key);
+        type25Count++;
+        
+        const absB = Math.abs(b);
+        let rewrittenOp, rewrittenA, rewrittenB;
+        
+        if(op === '+') {
+          rewrittenOp = '-';
+          rewrittenA = a;
+          rewrittenB = absB;
+        } else {
+          rewrittenOp = '+';
+          rewrittenA = a;
+          rewrittenB = absB;
+        }
+        
+        const rewritten = `${rewrittenA}${rewrittenOp}${rewrittenB}`;
+        const result = rewrittenOp === '+' ? rewrittenA + rewrittenB : rewrittenA - rewrittenB;
+        
+        list.push({
+          a,
+          b,
+          op,
+          needsRewriting: true,
+          rewritten,
+          rewrittenA,
+          rewrittenB,
+          rewrittenOp,
+          result,
+          correctAbsValue: Math.abs(result),
+          correctSignA: a >= 0 ? '+' : '-',
+          correctAbsA: Math.abs(a),
+          correctSignB: '+',
+          correctAbsB: absB
+        });
+      }
+    } else {
+      // Type 1-12: second number is positive
+      const firstNegative = Math.random() < 0.5;
+      a = firstNegative ? -rand(5, 20) : rand(5, 20);
+      b = rand(5, 20);
+      
+      if(Math.abs(a) === Math.abs(b)) continue;
+      
+      op = Math.random() < 0.5 ? '+' : '-';
+      
+      const result = op === '+' ? a + b : a - b;
+      const isEasy = (a > 0 && result > 0);
+      
+      if(isEasy && easyCount >= 3) {
+        continue;
+      }
+      
+      key = `${a}${op}${b}`;
+      if(!set.has(key)) {
+        set.add(key);
+        if(isEasy) easyCount++;
+        
+        list.push({
+          a,
+          b,
+          op,
+          needsRewriting: false,
+          result,
+          correctAbsValue: Math.abs(result)
+        });
+      }
+    }
+  }
+  
+  // Shuffle
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  
+  return list;
+}
+
+function parseAnswer(answer) {
+  answer = answer.replace(/\s/g, '');
+  
+  if(answer.includes('(') || answer.includes(')')) {
+    return {error: 'parentheses'};
+  }
+  
+  if(/^-?\d+$/.test(answer)) {
+    return {error: 'just_number'};
+  }
+  
+  const match = answer.match(/^(-?)(\d+)([\+\-])(-?)(\d+)$/);
+  
+  if(!match) {
+    return {error: 'invalid_format'};
+  }
+  
+  const sign1 = match[1] === '-' ? '-' : '+';
+  const abs1 = parseInt(match[2]);
+  const operation = match[3];
+  const sign2 = match[4] === '-' ? '-' : '+';
+  const abs2 = parseInt(match[5]);
+  
+  return {
+    sign1,
+    abs1,
+    operation,
+    sign2,
+    abs2
+  };
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showPopup() {
+  document.getElementById('LVL27popup').style.display = 'block';
+  document.getElementById('LVL27popupOverlay').style.display = 'block';
+}
+
+function hidePopup() {
+  document.getElementById('LVL27popup').style.display = 'none';
+  document.getElementById('LVL27popupOverlay').style.display = 'none';
+}
+
+document.getElementById('LVL27popupOkBtn').onclick = hidePopup;
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL27exercise');
+    document.getElementById('LVL27step1').style.display = 'none';
+    document.getElementById('LVL27step2').style.display = 'none';
+    document.getElementById('LVL27toggleBtn').style.display = 'none';
+    document.getElementById('LVL27showArrowBtn').style.display = 'none';
+    document.getElementById('LVL27arrowSection').style.display = 'none';
+    document.getElementById('LVL27checkBtn').style.display = 'none';
+    document.getElementById('LVL27nextBtn').style.display = 'none';
+    document.getElementById('LVL27feedback').style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL27backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL27backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+  arrowShown = false;
+  step2Visible = false;
+  selectedArrows = [];
+  extraDot = null;
+
+  // Format exercise
+  let exerciseText;
+  if(ex.needsRewriting) {
+    const bFormatted = ex.b < 0 ? `(${ex.b})` : ex.b;
+    exerciseText = `${ex.a} ${ex.op} ${bFormatted}`;
+  } else {
+    exerciseText = `${ex.a} ${ex.op} ${ex.b}`;
+  }
+  
+  document.getElementById('LVL27exercise').innerHTML = exerciseText;
+  
+  const input1 = document.getElementById('LVL27input1');
+  const input2 = document.getElementById('LVL27input2');
+  
+  input1.value = '';
+  input1.disabled = false;
+  input1.style.backgroundColor = '';
+  
+  input2.value = '';
+  input2.disabled = false;
+  input2.style.backgroundColor = '';
+  
+  document.getElementById('LVL27step2').style.display = 'none';
+  document.getElementById('LVL27toggleBtn').textContent = '+';
+  
+  const fb = document.getElementById('LVL27feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const arrowSection = document.getElementById('LVL27arrowSection');
+  arrowSection.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL27checkBtn');
+  const nextBtn = document.getElementById('LVL27nextBtn');
+  const showArrowBtn = document.getElementById('LVL27showArrowBtn');
+  const resetBtn = document.getElementById('LVL27resetBtn');
+  const toggleBtn = document.getElementById('LVL27toggleBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+  showArrowBtn.style.display = 'inline-block';
+  showArrowBtn.disabled = false;
+  toggleBtn.style.display = 'inline-block';
+  resetBtn.disabled = true;
+  resetBtn.style.display = 'inline-block';
+
+  function updateCheckButton() {
+    const hasInput1 = input1.value.trim() !== '';
+    const hasInput2 = input2.value.trim() !== '';
+    // Enable if at least one field has input
+    checkBtn.disabled = !(hasInput1 || hasInput2);
+  }
+
+  input1.oninput = updateCheckButton;
+  input2.oninput = updateCheckButton;
+
+  toggleBtn.onclick = () => {
+    if(step2Visible) {
+      document.getElementById('LVL27step2').style.display = 'none';
+      toggleBtn.textContent = '+';
+      input2.value = '';
+      step2Visible = false;
+    } else {
+      document.getElementById('LVL27step2').style.display = 'flex';
+      toggleBtn.textContent = '−';
+      step2Visible = true;
+    }
+  };
+
+  showArrowBtn.onclick = () => {
+    arrowShown = true;
+    arrowSection.style.display = 'block';
+    showArrowBtn.disabled = true;
+    
+    setupArrowDragDrop();
+  };
+
+  checkBtn.onclick = () => {
+    handleCheck();
+  };
+}
+
+function handleCheck() {
+  const ex = exercises[currentIndex];
+  const input1 = document.getElementById('LVL27input1');
+  const input2 = document.getElementById('LVL27input2');
+  const fb = document.getElementById('LVL27feedback');
+  
+  let value1 = input1.value.trim();
+  let value2 = input2.value.trim();
+  
+  // Swap logic: if field 1 is empty but field 2 is filled, treat field 2 as field 1
+  if(value1 === '' && value2 !== '') {
+    value1 = value2;
+    value2 = '';
+    // Visually swap the values
+    input1.value = value1;
+    input2.value = '';
+  }
+  
+  input1.disabled = true;
+  input2.disabled = true;
+  
+  const has1Field = value1 !== '';
+  const has2Fields = value1 !== '' && value2 !== '';
+  
+  // CASE: 1 field filled + Type 1-12
+  if(has1Field && !has2Fields && !ex.needsRewriting) {
+    // Normal check like level 1-12
+    checkType112(value1);
+  }
+  // CASE: 1 field filled + Type 2-5
+  else if(has1Field && !has2Fields && ex.needsRewriting) {
+    checkType25OneField(value1);
+  }
+  // CASE: 2 fields filled + Type 2-5
+  else if(has2Fields && ex.needsRewriting) {
+    // Normal check like level 2-5
+    checkType25TwoFields(value1, value2);
+  }
+  // CASE: 2 fields filled + Type 1-12
+  else if(has2Fields && !ex.needsRewriting) {
+    // Always wrong
+    input1.style.backgroundColor = '#ffcccc';
+    input2.style.backgroundColor = '#ffcccc';
+    
+    if(ex.op === '+') {
+      fb.innerHTML = 'Dit is een optelling met een positief getal. Dat kun je, eventueel met behulp van een pijlenschema, onmiddellijk uitrekenen.<br>Hier mag je dus geen tussenstap noteren.';
+    } else {
+      fb.innerHTML = 'Dit is een aftrekking met een positief getal. Dat kun je, eventueel met behulp van een pijlenschema, onmiddellijk uitrekenen.<br>Hier mag je dus geen tussenstap noteren.';
+    }
+    fb.style.display = 'block';
+  }
+  
+  document.getElementById('LVL27checkBtn').style.display = 'none';
+  document.getElementById('LVL27showArrowBtn').style.display = 'none';
+  document.getElementById('LVL27resetBtn').style.display = 'none';
+  document.getElementById('LVL27toggleBtn').style.display = 'none';
+  document.getElementById('LVL27nextBtn').style.display = 'inline-block';
+}
+
+function checkType112(answer) {
+  const ex = exercises[currentIndex];
+  const input1 = document.getElementById('LVL27input1');
+  const fb = document.getElementById('LVL27feedback');
+  
+  const answerNoSpaces = answer.replace(/\s/g, '');
+  const correctAnswerStr = ex.result.toString();
+  
+  // Check if fully calculated
+  const hasOperation = /[\+\-]/.test(answerNoSpaces.substring(1));
+  
+  if(hasOperation) {
+    input1.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = 'Je hebt niet volledig uitgerekend.';
+    fb.style.display = 'block';
+    return;
+  }
+  
+  // Parse answer
+  const userAnswer = parseInt(answerNoSpaces);
+  let userSign = 'positive';
+  let userAbsValue = Math.abs(userAnswer);
+  
+  if(answerNoSpaces.startsWith('-') || userAnswer < 0) {
+    userSign = 'negative';
+  } else if(answerNoSpaces.startsWith('+') || userAnswer > 0) {
+    userSign = 'positive';
+  } else if(userAnswer === 0) {
+    userSign = 'zero';
+  }
+  
+  const correctSign = ex.result >= 0 ? 'positive' : 'negative';
+  const correctAbsValue = ex.correctAbsValue;
+  
+  const signCorrect = (userSign === correctSign) || (userSign === 'positive' && correctSign === 'positive' && userAnswer === ex.result);
+  const absValueCorrect = (userAbsValue === correctAbsValue);
+  const isCorrectAnswer = signCorrect && absValueCorrect;
+  
+  // Check arrow diagram (same logic as level 12)
+  let arrowDiagramCorrect = false;
+  let arrowDiagramComplete = false;
+  let feedbackMessages = [];
+  let lengthFeedback = '';
+  
+  if(arrowShown && selectedArrows.length === 2) {
+    arrowDiagramComplete = true;
+    
+    const arrowA = selectedArrows.find(a => a.dataset.term === 'a');
+    const arrowB = selectedArrows.find(a => a.dataset.term === 'b');
+    
+    const dirACorrect = (ex.a >= 0 && arrowA.dataset.dir === 'right') || (ex.a < 0 && arrowA.dataset.dir === 'left');
+    const dirBCorrect = ((ex.op === '+' && arrowB.dataset.dir === 'right') || (ex.op === '-' && arrowB.dataset.dir === 'left'));
+    
+    if(!dirACorrect) {
+      if(arrowA.dataset.dir === 'right') {
+        feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar rechts. Maar het eerste getal is negatief, dus moet de eerste pijl naar links gaan.`);
+      } else {
+        feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar links. Maar het eerste getal is positief, dus moet de eerste pijl naar rechts gaan.`);
+      }
+    }
+    
+    if(!dirBCorrect) {
+      if(arrowB.dataset.dir === 'right') {
+        feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar rechts. Maar je trekt een positief getal af, dus de tweede pijl moet naar links gaan.`);
+      } else {
+        feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar links. Maar je telt een positief getal op, dus de tweede pijl moet naar rechts gaan.`);
+      }
+    }
+    
+    if(dirACorrect && dirBCorrect) {
+      const lenA = arrowA.querySelector('.line').offsetWidth;
+      const lenB = arrowB.querySelector('.line').offsetWidth;
+      const absA = Math.abs(ex.a);
+      const absB = Math.abs(ex.b);
+      
+      if(absA > absB && lenA <= lenB) {
+        lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het eerste getal heeft de grootste absolute waarde. De eerste (onderste) pijl moet dus langer zijn dan de tweede pijl.`;
+      } else if(absA < absB && lenA >= lenB) {
+        lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.`;
+      } else {
+        arrowDiagramCorrect = true;
+      }
+    }
+  }
+  
+  if(isCorrectAnswer && (!arrowDiagramComplete || arrowDiagramCorrect)) {
+    input1.style.backgroundColor = 'lightgreen';
+    fb.innerText = '✅ Correct!';
+    fb.style.display = 'block';
+    xp += 1;
+  } else if(isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+    input1.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = 'Het pijlenschema komt niet overeen met de oefening. Daarom wordt deze oefening fout gerekend, ook al is je antwoord correct.';
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && (!arrowShown || !arrowDiagramComplete)) {
+    input1.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `Het juiste antwoord is ${ex.result}.<br>Maak de volgende keer de pijlenvoorstelling. Het kan je helpen.`;
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && arrowDiagramComplete && arrowDiagramCorrect) {
+    input1.style.backgroundColor = '#ffcccc';
+    
+    let feedbackText = `Het juiste antwoord is ${ex.result}.<br>`;
+    
+    let sameDirection = false;
+    if(ex.a > 0 && ex.op === '+') {
+      sameDirection = true;
+    } else if(ex.a < 0 && ex.op === '-') {
+      sameDirection = true;
+    }
+    
+    const absA = Math.abs(ex.a);
+    const absB = Math.abs(ex.b);
+    const maxAbsValue = Math.max(absA, absB);
+    
+    const signWrong = !signCorrect;
+    const absValueWrong = !absValueCorrect;
+    
+    let isCalculationError = false;
+    if(absValueWrong) {
+      if(sameDirection) {
+        if(userAbsValue > maxAbsValue) {
+          isCalculationError = true;
+        }
+      } else {
+        if(userAbsValue < maxAbsValue) {
+          isCalculationError = true;
+        }
+      }
+    }
+    
+    if(signWrong && absValueWrong) {
+      feedbackText += 'Je antwoord heeft niet het juiste teken. Bestudeer het pijlenschema goed. Aan welke kant van 0 eindigt de bovenste pijl?<br>';
+      
+      if(isCalculationError) {
+        feedbackText += 'Je hebt de juiste strategie gebruikt om de absolute waarde van de uitkomst te berekenen, maar er is een rekenfout ingeslopen. Controleer je berekening nog eens.';
+      } else {
+        if(sameDirection) {
+          feedbackText += 'De pijlen gaan dezelfde kant op. De absolute waarde van de uitkomst krijg je dan door de lengtes van de twee pijlen op te tellen.';
+        } else {
+          feedbackText += 'De pijlen gaan elk een verschillende kant op. De absolute waarde van de uitkomst krijg je dan door het verschil te maken van de lengtes van de twee pijlen.';
+        }
+      }
+    } else if(signWrong) {
+      feedbackText += 'Je antwoord heeft niet het juiste teken. Bestudeer het pijlenschema goed. Aan welke kant van 0 eindigt de bovenste pijl?';
+    } else if(absValueWrong) {
+      if(isCalculationError) {
+        feedbackText += 'Je hebt de juiste strategie gebruikt, maar er is een rekenfout ingeslopen. Controleer je berekening nog eens.';
+      } else {
+        if(sameDirection) {
+          feedbackText += 'De pijlen gaan dezelfde kant op. De absolute waarde van de uitkomst krijg je dan door de lengtes van de twee pijlen op te tellen.';
+        } else {
+          feedbackText += 'De pijlen gaan elk een verschillende kant op. De absolute waarde van de uitkomst krijg je dan door het verschil te maken van de lengtes van de twee pijlen.';
+        }
+      }
+    }
+    
+    fb.innerHTML = feedbackText;
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+    input1.style.backgroundColor = '#ffcccc';
+    
+    let finalFeedback = 'Het pijlenschema is niet correct.<br>';
+    if(feedbackMessages.length > 0) {
+      finalFeedback += feedbackMessages.join('<br>');
+    } else {
+      finalFeedback += lengthFeedback;
+    }
+    
+    fb.innerHTML = finalFeedback;
+    fb.style.display = 'block';
+  }
+}
+
+function checkType25OneField(answer) {
+  const ex = exercises[currentIndex];
+  const input1 = document.getElementById('LVL27input1');
+  const fb = document.getElementById('LVL27feedback');
+  
+  const answerNoSpaces = answer.replace(/\s/g, '');
+  
+  // Check if it's just a number (direct calculation)
+  if(/^-?\d+$/.test(answerNoSpaces)) {
+    const userAnswer = parseInt(answerNoSpaces);
+    
+    // Check if it's the correct final result
+    if(userAnswer === ex.result) {
+      // Correct result but skipped rewriting step
+      input1.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = 'Dit is een opgave die herschreven moet worden. Hoewel dit verplicht is, heb je dat toch niet gedaan. Daarom wordt de oefening fout gerekend.<br>Hier moet je dus een tussenstap noteren.';
+      fb.style.display = 'block';
+    } else {
+      // Wrong answer - explain need to rewrite
+      input1.style.backgroundColor = '#ffcccc';
+      
+      if(ex.op === '+') {
+        fb.innerHTML = 'Dit is een optelling met een negatief getal. Dat moet je herschrijven naar een aftrekking met een positief getal.<br>Hier moet je dus een tussenstap noteren.';
+      } else {
+        fb.innerHTML = 'Dit is een aftrekking met een negatief getal. Dat moet je herschrijven naar een optelling met een positief getal.<br>Hier moet je dus een tussenstap noteren.';
+      }
+      fb.style.display = 'block';
+    }
+  } else {
+    // They rewrote - check if correct rewriting
+    const parsed = parseAnswer(answer);
+    
+    if(parsed.error === 'parentheses') {
+      input1.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Na het herschrijven kunnen er geen haakjes meer staan.<br>De juiste tussenstap is: ${ex.rewritten}`;
+      fb.style.display = 'block';
+    } else if(parsed.error === 'invalid_format') {
+      input1.style.backgroundColor = '#ffcccc';
+      
+      if(ex.op === '+') {
+        fb.innerHTML = 'Dit is een optelling met een negatief getal. Dat moet je herschrijven naar een aftrekking met een positief getal.';
+      } else {
+        fb.innerHTML = 'Dit is een aftrekking met een negatief getal. Dat moet je herschrijven naar een optelling met een positief getal.';
+      }
+      fb.style.display = 'block';
+    } else if(parsed.abs1 !== ex.correctAbsA || parsed.abs2 !== ex.correctAbsB) {
+      input1.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Je verandert de getallen. Check je antwoord voor je op controleren drukt.<br>De juiste tussenstap is: ${ex.rewritten}`;
+      fb.style.display = 'block';
+    } else {
+      const sign1Correct = parsed.sign1 === ex.correctSignA;
+      const opCorrect = parsed.operation === ex.rewrittenOp;
+      const sign2Correct = parsed.sign2 === ex.correctSignB;
+      
+      const rewriteCorrect = sign1Correct && opCorrect && sign2Correct;
+      
+      if(rewriteCorrect) {
+        // Correctly rewrote but didn't calculate
+        showPopup();
+        input1.disabled = false;
+      } else {
+        // Incorrectly rewrote
+        input1.style.backgroundColor = '#ffcccc';
+        
+        let feedbackText = '';
+        
+        const changedFirstSign = (parsed.sign1 !== ex.correctSignA);
+        const changedOperation = (parsed.operation !== ex.op);
+        
+        if(ex.op === '+') {
+          if(changedFirstSign && !changedOperation) {
+            feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+          } else if(changedFirstSign && changedOperation) {
+            feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+          } else if(!changedFirstSign && !changedOperation) {
+            feedbackText = 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+          } else {
+            feedbackText = 'Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+          }
+        } else {
+          if(changedFirstSign && !changedOperation) {
+            feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+          } else if(changedFirstSign && changedOperation) {
+            feedbackText = 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+          } else if(!changedFirstSign && !changedOperation) {
+            feedbackText = 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+          } else {
+            feedbackText = 'Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+          }
+        }
+        
+        feedbackText += `<br>De juiste tussenstap is: ${ex.rewritten}`;
+        fb.innerHTML = feedbackText;
+        fb.style.display = 'block';
+      }
+    }
+  }
+}
+
+function checkType25TwoFields(value1, value2) {
+  // This is the full level 2-5 logic
+  const ex = exercises[currentIndex];
+  const input1 = document.getElementById('LVL27input1');
+  const input2 = document.getElementById('LVL27input2');
+  const fb = document.getElementById('LVL27feedback');
+  
+  const parsed = parseAnswer(value1);
+  
+  let rewriteCorrect = false;
+  
+  if(parsed.error === 'parentheses') {
+    input1.style.backgroundColor = '#ffcccc';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `De tussenstap is niet juist.<br>Na het herschrijven kunnen er geen haakjes meer staan.<br>De juiste tussenstap is: ${ex.rewritten}`;
+    fb.style.display = 'block';
+  } else if(parsed.error === 'just_number') {
+    input1.style.backgroundColor = '#ffcccc';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `De tussenstap is niet juist.<br>De opgave is enkel herschrijven. Je rekent nog niets uit.<br>De juiste tussenstap is: ${ex.rewritten}`;
+    fb.style.display = 'block';
+  } else if(parsed.error === 'invalid_format') {
+    input1.style.backgroundColor = '#ffcccc';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `De tussenstap is niet juist.<br>Controleer je herschrijving.<br>De juiste tussenstap is: ${ex.rewritten}`;
+    fb.style.display = 'block';
+  } else if(parsed.abs1 !== ex.correctAbsA || parsed.abs2 !== ex.correctAbsB) {
+    input1.style.backgroundColor = '#ffcccc';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `De tussenstap is niet juist.<br>Je verandert de getallen. Check je antwoord voor je op controleren drukt.<br>De juiste tussenstap is: ${ex.rewritten}`;
+    fb.style.display = 'block';
+  } else {
+    const sign1Correct = parsed.sign1 === ex.correctSignA;
+    const opCorrect = parsed.operation === ex.rewrittenOp;
+    const sign2Correct = parsed.sign2 === ex.correctSignB;
+    
+    rewriteCorrect = sign1Correct && opCorrect && sign2Correct;
+    
+    if(!rewriteCorrect) {
+      input1.style.backgroundColor = '#ffcccc';
+      input2.style.backgroundColor = '#ffcccc';
+      
+      let feedbackText = 'De tussenstap is niet juist.<br>';
+      
+      const changedFirstSign = (parsed.sign1 !== ex.correctSignA);
+      const changedOperation = (parsed.operation !== ex.op);
+      
+      if(ex.op === '+') {
+        if(changedFirstSign && !changedOperation) {
+          feedbackText += 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+        } else if(changedFirstSign && changedOperation) {
+          feedbackText += 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+        } else if(!changedFirstSign && !changedOperation) {
+          feedbackText += 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+        } else {
+          feedbackText += 'Hier wordt een negatief getal opgeteld. Dat is hetzelfde als een positief getal aftrekken. De optelling wordt dus een aftrekking en je neemt het tegengestelde van het tweede getal.';
+        }
+      } else {
+        if(changedFirstSign && !changedOperation) {
+          feedbackText += 'Je hebt van beide getallen het tegengestelde genomen en de bewerking niet veranderd. Bij het herschrijven verandert het eerste getal nooit.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+        } else if(changedFirstSign && changedOperation) {
+          feedbackText += 'Je hebt van beide getallen het tegengestelde genomen en de bewerking veranderd. Bij het herschrijven verandert het eerste getal nooit.';
+        } else if(!changedFirstSign && !changedOperation) {
+          feedbackText += 'Je hebt van het tweede getal het tegengestelde genomen en de bewerking niet veranderd.<br>Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+        } else {
+          feedbackText += 'Hier wordt een negatief getal afgetrokken. Dat is hetzelfde als een positief getal optellen. De aftrekking wordt dus een optelling en je neemt het tegengestelde van het tweede getal.';
+        }
+      }
+      
+      feedbackText += `<br>De juiste tussenstap is: ${ex.rewritten}`;
+      fb.innerHTML = feedbackText;
+      fb.style.display = 'block';
+    }
+  }
+  
+  if(rewriteCorrect) {
+    const answerNoSpaces = value2.replace(/\s/g, '');
+    const hasOperation = /[\+\-]/.test(answerNoSpaces.substring(1));
+    
+    if(hasOperation) {
+      input1.style.backgroundColor = 'lightgreen';
+      input2.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = 'De tussenstap is juist, maar je hebt het fout uitgerekend.<br>Je hebt niet volledig uitgerekend.';
+      fb.style.display = 'block';
+    } else {
+      checkFinalAnswerFor25(value2);
+    }
+  }
+}
+
+function checkFinalAnswerFor25(answerStr) {
+  const ex = exercises[currentIndex];
+  const input1 = document.getElementById('LVL27input1');
+  const input2 = document.getElementById('LVL27input2');
+  const fb = document.getElementById('LVL27feedback');
+  
+  const userAnswer = parseInt(answerStr);
+  
+  let userSign = 'positive';
+  let userAbsValue = Math.abs(userAnswer);
+  
+  if(answerStr.startsWith('-') || userAnswer < 0) {
+    userSign = 'negative';
+  } else if(answerStr.startsWith('+') || userAnswer > 0) {
+    userSign = 'positive';
+  } else if(userAnswer === 0) {
+    userSign = 'zero';
+  }
+  
+  const correctSign = ex.result >= 0 ? 'positive' : 'negative';
+  const correctAbsValue = ex.correctAbsValue;
+  
+  const signCorrect = (userSign === correctSign) || (userSign === 'positive' && correctSign === 'positive' && userAnswer === ex.result);
+  const absValueCorrect = (userAbsValue === correctAbsValue);
+  const isCorrectAnswer = signCorrect && absValueCorrect;
+  
+  let feedbackMessages = [];
+  let lengthFeedback = '';
+  let arrowDiagramCorrect = false;
+  let arrowDiagramComplete = false;
+  
+  if(arrowShown && selectedArrows.length === 2) {
+    arrowDiagramComplete = true;
+    
+    const arrowA = selectedArrows.find(a => a.dataset.term === 'a');
+    const arrowB = selectedArrows.find(a => a.dataset.term === 'b');
+    
+    const dirACorrect = (ex.rewrittenA >= 0 && arrowA.dataset.dir === 'right') || (ex.rewrittenA < 0 && arrowA.dataset.dir === 'left');
+    const dirBCorrect = ((ex.rewrittenOp === '+' && arrowB.dataset.dir === 'right') || (ex.rewrittenOp === '-' && arrowB.dataset.dir === 'left'));
+    
+    if(!dirACorrect) {
+      if(arrowA.dataset.dir === 'right') {
+        feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar rechts. Maar het eerste getal is negatief, dus moet de eerste pijl naar links gaan.`);
+      } else {
+        feedbackMessages.push(`Bij jou gaat de eerste (onderste) pijl naar links. Maar het eerste getal is positief, dus moet de eerste pijl naar rechts gaan.`);
+      }
+    }
+    
+    if(!dirBCorrect) {
+      if(arrowB.dataset.dir === 'right') {
+        feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar rechts. Maar je trekt een positief getal af, dus de tweede pijl moet naar links gaan.`);
+      } else {
+        feedbackMessages.push(`Bij jou gaat de tweede (bovenste) pijl naar links. Maar je telt een positief getal op, dus de tweede pijl moet naar rechts gaan.`);
+      }
+    }
+    
+    if(dirACorrect && dirBCorrect) {
+      const lenA = arrowA.querySelector('.line').offsetWidth;
+      const lenB = arrowB.querySelector('.line').offsetWidth;
+      const absA = Math.abs(ex.rewrittenA);
+      const absB = Math.abs(ex.rewrittenB);
+      
+      if(absA > absB && lenA <= lenB) {
+        lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het eerste getal heeft de grootste absolute waarde. De eerste (onderste) pijl moet dus langer zijn dan de tweede pijl.`;
+      } else if(absA < absB && lenA >= lenB) {
+        lengthFeedback = `Je pijlen gaan al de goede kant op. Maar het tweede getal heeft de grootste absolute waarde. De tweede (bovenste) pijl moet dus langer zijn dan de eerste pijl.`;
+      } else {
+        arrowDiagramCorrect = true;
+      }
+    }
+  }
+  
+  if(isCorrectAnswer && (!arrowDiagramComplete || arrowDiagramCorrect)) {
+    input1.style.backgroundColor = 'lightgreen';
+    input2.style.backgroundColor = 'lightgreen';
+    fb.innerText = '✅ Correct!';
+    fb.style.display = 'block';
+    xp += 1;
+  } else if(isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+    input1.style.backgroundColor = 'lightgreen';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = 'De tussenstap is juist, maar je hebt het fout uitgerekend.<br>Het pijlenschema komt niet overeen met de oefening. Daarom wordt deze oefening fout gerekend, ook al is je antwoord correct.';
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && (!arrowShown || !arrowDiagramComplete)) {
+    input1.style.backgroundColor = 'lightgreen';
+    input2.style.backgroundColor = '#ffcccc';
+    fb.innerHTML = `De tussenstap is juist, maar je hebt het fout uitgerekend.<br>Het juiste antwoord is ${ex.result}. Maak de volgende keer de pijlenvoorstelling. Het kan je helpen.`;
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && arrowDiagramComplete && arrowDiagramCorrect) {
+    input1.style.backgroundColor = 'lightgreen';
+    input2.style.backgroundColor = '#ffcccc';
+    
+    let feedbackText = `De tussenstap is juist, maar je hebt het fout uitgerekend.<br>Het juiste antwoord is ${ex.result}.<br>`;
+    
+    let sameDirection = false;
+    if(ex.rewrittenA > 0 && ex.rewrittenOp === '+') {
+      sameDirection = true;
+    } else if(ex.rewrittenA < 0 && ex.rewrittenOp === '-') {
+      sameDirection = true;
+    }
+    
+    const absA = Math.abs(ex.rewrittenA);
+    const absB = Math.abs(ex.rewrittenB);
+    const maxAbsValue = Math.max(absA, absB);
+    
+    const signWrong = !signCorrect;
+    const absValueWrong = !absValueCorrect;
+    
+    let isCalculationError = false;
+    if(absValueWrong) {
+      if(sameDirection) {
+        if(userAbsValue > maxAbsValue) {
+          isCalculationError = true;
+        }
+      } else {
+        if(userAbsValue < maxAbsValue) {
+          isCalculationError = true;
+        }
+      }
+    }
+    
+    if(signWrong && absValueWrong) {
+      feedbackText += 'Je antwoord heeft niet het juiste teken. Bestudeer het pijlenschema goed. Aan welke kant van 0 eindigt de bovenste pijl?<br>';
+      
+      if(isCalculationError) {
+        feedbackText += 'Je hebt de juiste strategie gebruikt om de absolute waarde van de uitkomst te berekenen, maar er is een rekenfout ingeslopen. Controleer je berekening nog eens.';
+      } else {
+        if(sameDirection) {
+          feedbackText += 'De pijlen gaan dezelfde kant op. De absolute waarde van de uitkomst krijg je dan door de lengtes van de twee pijlen op te tellen.';
+        } else {
+          feedbackText += 'De pijlen gaan elk een verschillende kant op. De absolute waarde van de uitkomst krijg je dan door het verschil te maken van de lengtes van de twee pijlen.';
+        }
+      }
+    } else if(signWrong) {
+      feedbackText += 'Je antwoord heeft niet het juiste teken. Bestudeer het pijlenschema goed. Aan welke kant van 0 eindigt de bovenste pijl?';
+    } else if(absValueWrong) {
+      if(isCalculationError) {
+        feedbackText += 'Je hebt de juiste strategie gebruikt, maar er is een rekenfout ingeslopen. Controleer je berekening nog eens.';
+      } else {
+        if(sameDirection) {
+          feedbackText += 'De pijlen gaan dezelfde kant op. De absolute waarde van de uitkomst krijg je dan door de lengtes van de twee pijlen op te tellen.';
+        } else {
+          feedbackText += 'De pijlen gaan elk een verschillende kant op. De absolute waarde van de uitkomst krijg je dan door het verschil te maken van de lengtes van de twee pijlen.';
+        }
+      }
+    }
+    
+    fb.innerHTML = feedbackText;
+    fb.style.display = 'block';
+  } else if(!isCorrectAnswer && arrowDiagramComplete && !arrowDiagramCorrect) {
+    input1.style.backgroundColor = 'lightgreen';
+    input2.style.backgroundColor = '#ffcccc';
+    
+    let finalFeedback = 'De tussenstap is juist, maar je hebt het fout uitgerekend.<br>Het pijlenschema is niet correct.<br>';
+    if(feedbackMessages.length > 0) {
+      finalFeedback += feedbackMessages.join('<br>');
+    } else {
+      finalFeedback += lengthFeedback;
+    }
+    
+    fb.innerHTML = finalFeedback;
+    fb.style.display = 'block';
+  }
+}
+
+function setupArrowDragDrop() {
+  const ex = exercises[currentIndex];
+  const arrowChoicesDiv = document.getElementById('LVL27arrowChoices');
+  arrowChoicesDiv.innerHTML = '';
+  
+  const arrowData = [
+    {color:'blue', dir:'right', len:longArrowLength, idx:0},
+    {color:'blue', dir:'right', len:shortArrowLength, idx:1},
+    {color:'orange', dir:'left', len:longArrowLength, idx:2},
+    {color:'orange', dir:'left', len:shortArrowLength, idx:3}
+  ];
+  
+  const targetDiv = document.getElementById('LVL27target');
+  targetDiv.innerHTML = '<div class="axis"></div>';
+  
+  const zeroLine = document.createElement('div');
+  zeroLine.className = 'zero-line';
+  targetDiv.appendChild(zeroLine);
+  
+  const zeroLabel = document.createElement('div');
+  zeroLabel.className = 'zero';
+  zeroLabel.innerText = '0';
+  targetDiv.appendChild(zeroLabel);
+  
+  firstDot = document.createElement('div');
+  firstDot.className = 'target-dot';
+  firstDot.style.left = '50%';
+  firstDot.style.transform = 'translateX(-50%)';
+  firstDot.style.top = '50px';
+  firstDot.dataset.idx = '0';
+  targetDiv.appendChild(firstDot);
+  
+  arrowData.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'arrow';
+    div.style.width = a.len + 'px';
+    
+    const line = document.createElement('div');
+    line.className = 'line';
+    line.style.background = a.color;
+    line.style.width = a.len + 'px';
+    line.style.left = '0';
+    div.appendChild(line);
+    
+    const tip = document.createElement('div');
+    tip.className = 'tip';
+    tip.style.borderTopColor = 'transparent';
+    tip.style.borderBottomColor = 'transparent';
+    tip.style.top = '5px';
+    if(a.dir === 'right') {
+      tip.style.borderLeft = `10px solid ${a.color}`;
+      tip.style.left = (a.len - 10) + 'px';
+    } else {
+      tip.style.borderRight = `10px solid ${a.color}`;
+      tip.style.left = '0px';
+    }
+    div.appendChild(tip);
+    
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.left = a.dir === 'right' ? '0px' : (a.len - 8) + 'px';
+    div.appendChild(dot);
+    
+    div.dataset.idx = a.idx;
+    div.dataset.color = a.color;
+    div.dataset.dir = a.dir;
+    div.dataset.len = a.len;
+    
+    div.onmousedown = dragMouseDown;
+    arrowChoicesDiv.appendChild(div);
+  });
+  
+  function dragMouseDown(e) {
+    if(this.classList.contains('fixed')) return;
+    e.preventDefault();
+    let elm = this;
+    
+    const shiftX = e.clientX - elm.getBoundingClientRect().left;
+    const shiftY = e.clientY - elm.getBoundingClientRect().top;
+    
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.style.width = elm.offsetWidth + 'px';
+    placeholder.style.height = elm.offsetHeight + 'px';
+    const parent = elm.parentNode;
+    parent.insertBefore(placeholder, elm);
+    elm.style.position = 'absolute';
+    elm.style.zIndex = 1000;
+    
+    function moveAt(pageX, pageY) {
+      elm.style.left = pageX - shiftX + 'px';
+      elm.style.top = pageY - shiftY + 'px';
+    }
+    
+    function onMouseMove(event) {
+      moveAt(event.pageX, event.pageY);
+    }
+    
+    document.addEventListener('mousemove', onMouseMove);
+    
+    elm.onmouseup = function() {
+      document.removeEventListener('mousemove', onMouseMove);
+      elm.onmouseup = null;
+      
+      const startDot = extraDot ? extraDot : firstDot;
+      const dot = elm.querySelector('.dot');
+      const dotRect = dot.getBoundingClientRect();
+      const targetRect = startDot.getBoundingClientRect();
+      
+      if(Math.abs(dotRect.left - targetRect.left) < 15 && Math.abs(dotRect.top - targetRect.top) < 15) {
+        elm.style.display = 'none';
+        
+        const arrowLen = parseFloat(elm.dataset.len);
+        const dir = elm.dataset.dir;
+        const color = elm.dataset.color;
+        
+        const startX = startDot.offsetLeft + startDot.offsetWidth / 2;
+        const startY = startDot.offsetTop + startDot.offsetHeight / 2;
+        const endX = dir === 'right' ? startX + arrowLen : startX - arrowLen;
+        
+        const newArrow = document.createElement('div');
+        newArrow.className = 'arrow';
+        newArrow.style.position = 'absolute';
+        newArrow.style.left = Math.min(startX, endX) + 'px';
+        newArrow.style.top = startY - 9 + 'px';
+        
+        // Determine which term this arrow represents
+        let termValue, termName;
+        if(!selectedArrows.find(a => a.dataset.term === 'a')) {
+          if(ex.needsRewriting) {
+            termValue = Math.abs(ex.rewrittenA);
+          } else {
+            termValue = Math.abs(ex.a);
+          }
+          termName = 'a';
+        } else {
+          if(ex.needsRewriting) {
+            termValue = Math.abs(ex.rewrittenB);
+          } else {
+            termValue = Math.abs(ex.b);
+          }
+          termName = 'b';
+        }
+        
+        newArrow.dataset.value = termValue;
+        newArrow.dataset.term = termName;
+        newArrow.dataset.dir = dir;
+        
+        const line = document.createElement('div');
+        line.className = 'line';
+        line.style.background = color;
+        line.style.position = 'absolute';
+        line.style.left = '0px';
+        line.style.top = '9px';
+        line.style.width = Math.abs(endX - startX) + 'px';
+        newArrow.appendChild(line);
+        
+        const tip = document.createElement('div');
+        tip.className = 'tip';
+        tip.style.borderTopColor = 'transparent';
+        tip.style.borderBottomColor = 'transparent';
+        tip.style.top = '5px';
+        if(dir === 'right') {
+          tip.style.borderLeft = `10px solid ${color}`;
+          tip.style.left = (Math.abs(endX - startX) - 10) + 'px';
+        } else {
+          tip.style.borderRight = `10px solid ${color}`;
+          tip.style.left = '0px';
+        }
+        newArrow.appendChild(tip);
+        
+        targetDiv.appendChild(newArrow);
+        selectedArrows.push(newArrow);
+        
+        if(!extraDot) {
+          extraDot = document.createElement('div');
+          extraDot.className = 'target-dot';
+          const offsetX = dir === 'right' ? arrowLen : -arrowLen;
+          extraDot.style.left = (firstDot.offsetLeft + offsetX) + 'px';
+          extraDot.style.top = (firstDot.offsetTop - 30) + 'px';
+          targetDiv.appendChild(extraDot);
+        }
+        
+        document.getElementById('LVL27resetBtn').disabled = false;
+        
+        if(selectedArrows.length === 2) {
+          const remainingArrows = document.querySelectorAll('#LVL27arrowChoices .arrow');
+          remainingArrows.forEach(a => {
+            a.classList.add('fixed');
+            a.style.cursor = 'default';
+          });
+        }
+        
+      } else {
+        parent.insertBefore(elm, placeholder);
+        elm.style.position = '';
+        elm.style.left = '';
+        elm.style.top = '';
+      }
+      placeholder.remove();
+    };
+  }
+  
+  document.getElementById('LVL27resetBtn').onclick = () => {
+    selectedArrows.forEach(a => a.remove());
+    selectedArrows = [];
+    if(extraDot) {
+      extraDot.remove();
+      extraDot = null;
+    }
+    
+    const choices = document.querySelectorAll('#LVL27arrowChoices .arrow');
+    choices.forEach(c => {
+      c.style.display = 'block';
+      c.style.position = '';
+      c.style.left = '';
+      c.style.top = '';
+      c.classList.remove('fixed');
+      c.style.cursor = 'grab';
+    });
+    
+    document.querySelectorAll('#LVL27arrowChoices .placeholder').forEach(p => p.remove());
+    document.getElementById('LVL27resetBtn').disabled = true;
+  };
+}
+
+document.getElementById('LVL27nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+showExercise();
+</script>
+
+</body>
+</html>
