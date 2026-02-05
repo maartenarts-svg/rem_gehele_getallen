@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Level 4-1 - Schrijf als een vermenigvuldiging</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px;
+  background: #f7f9fc;
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+}
+
+#LVL41exercise {
+  margin-bottom: 25px;
+  font-size: 32px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#LVL41answerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#LVL41answerInput {
+  width: 300px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+}
+
+#LVL41answerInput:focus {
+  border-color: #007BFF;
+}
+
+#LVL41feedback {
+  display: none;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff9e6;
+  padding: 12px 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.base-color {
+  color: #0066cc;
+  font-weight: bold;
+}
+
+.exponent-color {
+  color: #cc3300;
+  font-weight: bold;
+}
+
+button {
+  padding: 12px 25px;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  border: none;
+  background-color: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+button:hover:enabled {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#LVL41nextBtn {
+  background-color: #28a745;
+}
+
+#LVL41nextBtn:hover:enabled {
+  background-color: #1e7e34;
+}
+
+#LVL41progressContainer {
+  width: 80%;
+  height: 18px;
+  background: #e6e6e6;
+  border-radius: 10px;
+  margin: 20px auto 30px auto;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#LVL41progressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6ddf4b, #4cc936);
+  transition: width 0.4s ease;
+}
+</style>
+</head>
+<body>
+
+<h1>Level 1 - Schrijf als een vermenigvuldiging</h1>
+<div id="LVL41exercise"></div>
+<div id="LVL41answerSection">
+  <span>=</span>
+  <input type="text" id="LVL41answerInput" placeholder="?" autocomplete="off" />
+</div>
+<button id="LVL41checkBtn" disabled>Controleer</button>
+<div id="LVL41feedback"></div>
+<button id="LVL41nextBtn" style="display:none;">Volgende oefening</button>
+
+<div id="LVL41progressContainer">
+  <div id="LVL41progressBar"></div>
+</div>
+
+<script>
+const numExercises = 10;
+let currentIndex = 0;
+let exercises = [];
+let xp = 0;
+
+function updateProgressBar() {
+  const percentage = (currentIndex / numExercises) * 100;
+  document.getElementById('LVL41progressBar').style.width = percentage + "%";
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateUniqueExercises(num) {
+  const list = [];
+  const set = new Set();
+
+  while(list.length < num) {
+    const base = rand(2, 20);
+    let exponent = rand(2, 6);
+    
+    // Make sure base and exponent are different
+    while(exponent === base) {
+      exponent = rand(2, 6);
+    }
+    
+    const key = `${base}^${exponent}`;
+    
+    if(!set.has(key)) {
+      set.add(key);
+      
+      // Generate correct answer
+      const factors = [];
+      for(let i = 0; i < exponent; i++) {
+        factors.push(base);
+      }
+      const correctAnswer = factors.join('·');
+      
+      list.push({
+        base,
+        exponent,
+        correctAnswer
+      });
+    }
+  }
+  
+  return list;
+}
+
+exercises = generateUniqueExercises(numExercises);
+
+function showExercise() {
+  updateProgressBar();
+  
+  if(currentIndex >= exercises.length) {
+    const exerciseDiv = document.getElementById('LVL41exercise');
+    const answerSection = document.getElementById('LVL41answerSection');
+    const fb = document.getElementById('LVL41feedback');
+    const checkBtn = document.getElementById('LVL41checkBtn');
+    const nextBtn = document.getElementById('LVL41nextBtn');
+
+    answerSection.style.display = 'none';
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    fb.style.display = 'none';
+
+    let geslaagd = xp >= 7;
+    let message = "";
+    if(geslaagd) {
+      message = `<div style="color:#0a7f2e; font-size:18px; margin-top:10px;">
+                 Goed zo! Je hebt dit onder de knie!<br>Je bent klaar om naar de volgende level te gaan.
+               </div>`;
+    } else {
+      message = `<div style="color:#b30000; font-size:18px; margin-top:10px;">
+                 Dit lukt nog niet zo goed.<br>Doe deze level opnieuw.
+               </div>`;
+    }
+    
+    exerciseDiv.innerHTML = `
+      <div style="background:white; padding:25px; border-radius:20px; 
+                  box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:350px; margin: auto;">
+         <h2 style="color:#2c3e50;">🎉 Level voltooid! 🎉</h2>
+         <div style="font-size:40px; margin:15px 0; color:#f4a300;">⭐ ${xp} XP</div>
+         ${message}
+         <button id="LVL41backBtn" style="margin-top:15px;">Terug naar kaart</button>
+      </div>
+    `;
+
+    document.getElementById('LVL41backBtn').onclick = () => {
+      if(window.parent.completeLevelFromIframe) {
+        window.parent.completeLevelFromIframe(xp, geslaagd);
+      }
+    };
+
+    return;
+  }
+
+  const ex = exercises[currentIndex];
+
+  // Display power using superscript
+  document.getElementById('LVL41exercise').innerHTML = `${ex.base}<sup>${ex.exponent}</sup>`;
+  
+  const answerInput = document.getElementById('LVL41answerInput');
+  answerInput.value = '';
+  answerInput.disabled = false;
+  answerInput.style.backgroundColor = '';
+  
+  const fb = document.getElementById('LVL41feedback');
+  fb.innerText = '';
+  fb.style.display = 'none';
+
+  const checkBtn = document.getElementById('LVL41checkBtn');
+  const nextBtn = document.getElementById('LVL41nextBtn');
+
+  checkBtn.disabled = true;
+  checkBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'none';
+
+  // Auto-replace * with ·
+  answerInput.oninput = () => {
+    let value = answerInput.value;
+    value = value.replace(/\*/g, '·');
+    answerInput.value = value;
+    
+    checkBtn.disabled = value.trim() === '';
+  };
+
+  checkBtn.onclick = () => {
+    const userAnswerStr = answerInput.value.trim();
+    answerInput.disabled = true;
+
+    const fb = document.getElementById('LVL41feedback');
+    
+    // Remove all spaces for checking
+    const cleanAnswer = userAnswerStr.replace(/\s/g, '');
+    
+    // NIEUWE VALIDATIE: Check voor tikfouten met maaltekens
+    // Controleer op dubbele middelpunten (··) of middelpunt aan begin/einde
+    if(cleanAnswer.includes('··') || cleanAnswer.startsWith('·') || cleanAnswer.endsWith('·')) {
+      answerInput.style.backgroundColor = '#ffffcc'; // Lichtgeel voor waarschuwing
+      answerInput.disabled = false; // Laat de leerling het aanpassen
+      fb.innerHTML = `⚠️ Controleer je invoer.`;
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+      checkBtn.style.display = 'inline-block';
+      nextBtn.style.display = 'none';
+      return; // Stop hier, geef de leerling de kans om te corrigeren
+    }
+    
+    // Split by · to get factors
+    const factors = cleanAnswer.split('·');
+    
+    // Check if all factors are the same
+    const allSameFactor = factors.every(f => f === factors[0]);
+    
+    // Check if factors are numbers
+    const allNumbers = factors.every(f => /^\d+$/.test(f));
+    
+    if(!allNumbers) {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Een macht is een verkorte schrijfwijze van een vermenigvuldiging van steeds dezelfde factoren. Het <span class="base-color">grondtal</span>, hier <span class="base-color">${ex.base}</span>, is de factor die steeds herhaald wordt. De <span class="exponent-color">exponent</span>, hier <span class="exponent-color">${ex.exponent}</span>, zegt je hoeveel keer die factor in de vermenigvuldiging staat.<br>Het juiste antwoord is ${ex.correctAnswer}.`;
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+      checkBtn.style.display = 'none';
+      nextBtn.style.display = 'inline-block';
+      return;
+    }
+    
+    const userFactorValue = parseInt(factors[0]);
+    const userCount = factors.length;
+    
+    // Check if all factors are the same
+    if(!allSameFactor) {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Een macht is een verkorte schrijfwijze van een vermenigvuldiging van steeds dezelfde factoren. Het <span class="base-color">grondtal</span>, hier <span class="base-color">${ex.base}</span>, is de factor die steeds herhaald wordt. De <span class="exponent-color">exponent</span>, hier <span class="exponent-color">${ex.exponent}</span>, zegt je hoeveel keer die factor in de vermenigvuldiging staat.<br>Het juiste antwoord is ${ex.correctAnswer}.`;
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+    }
+    // Check if factor matches base
+    else if(userFactorValue !== ex.base) {
+      answerInput.style.backgroundColor = '#ffcccc';
+      fb.innerHTML = `Een macht is een verkorte schrijfwijze van een vermenigvuldiging van steeds dezelfde factoren. Het <span class="base-color">grondtal</span>, hier <span class="base-color">${ex.base}</span>, is de factor die steeds herhaald wordt. De <span class="exponent-color">exponent</span>, hier <span class="exponent-color">${ex.exponent}</span>, zegt je hoeveel keer die factor in de vermenigvuldiging staat.<br>Het juiste antwoord is ${ex.correctAnswer}.`;
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+    }
+    // Check if count matches exponent
+    else if(userCount !== ex.exponent) {
+      answerInput.style.backgroundColor = '#ffcccc';
+      
+      const difference = Math.abs(userCount - ex.exponent);
+      
+      if(difference === 1) {
+        // Off by 1
+        fb.innerHTML = `Je weet hoe een macht werkt, maar je hebt je mistelt. Bij jou staat het grondtal er ${userCount} keer. Volgens de exponent ${ex.exponent} moet die er ${ex.exponent} keer staan.`;
+      } else {
+        // Off by more than 1
+        fb.innerHTML = `Je weet dat de macht een vermenigvuldiging is met dezelfde factoren. Het aantal factoren in de vermenigvuldiging wordt gegeven door de exponent, hier ${ex.exponent}.<br>Het juiste antwoord is ${ex.correctAnswer}.`;
+      }
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+    }
+    // Correct!
+    else {
+      answerInput.style.backgroundColor = 'lightgreen';
+      fb.innerText = '✅ Correct!';
+      fb.style.backgroundColor = '#fff9e6';
+      fb.style.display = 'block';
+      xp += 1;
+    }
+
+    checkBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+  };
+}
+
+document.getElementById('LVL41nextBtn').onclick = () => {
+  currentIndex++;
+  showExercise();
+};
+
+showExercise();
+</script>
+
+</body>
+</html>
